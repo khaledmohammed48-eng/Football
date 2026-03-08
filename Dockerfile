@@ -7,8 +7,8 @@ COPY package*.json ./
 COPY packages/shared/package*.json packages/shared/
 COPY apps/web/package*.json apps/web/
 
-# Install all workspace dependencies
-RUN npm install
+# Install all workspace dependencies and dedupe to avoid duplicate React
+RUN npm install && npm dedupe
 
 # Copy source
 COPY packages/ packages/
