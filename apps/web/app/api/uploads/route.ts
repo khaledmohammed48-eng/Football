@@ -3,7 +3,9 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
+const UPLOAD_DIR =
+  process.env.UPLOAD_DIR ??
+  (process.env.NODE_ENV === 'production' ? '/data/uploads' : join(process.cwd(), 'uploads'));
 
 export async function POST(request: Request) {
   const { error, status } = await requireAuth('SUPER_ADMIN');

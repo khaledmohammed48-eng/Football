@@ -2,7 +2,9 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { NextResponse } from 'next/server';
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
+const UPLOAD_DIR =
+  process.env.UPLOAD_DIR ??
+  (process.env.NODE_ENV === 'production' ? '/data/uploads' : join(process.cwd(), 'uploads'));
 
 const MIME: Record<string, string> = {
   jpg: 'image/jpeg', jpeg: 'image/jpeg',

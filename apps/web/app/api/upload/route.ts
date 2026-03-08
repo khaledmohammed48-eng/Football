@@ -1,12 +1,18 @@
 import { requireAuth, errorResponse, successResponse } from '@/lib/api-helpers';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { randomUUID } from 'crypto';
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
+// In production (Railway) use /data/uploads (persistent volume).
+// In development fall back to <cwd>/uploads.
+const UPLOAD_DIR =
+  process.env.UPLOAD_DIR ??
+  (process.env.NODE_ENV === 'production' ? '/data/uploads' : path.join(process.cwd(), 'uploads'));
+
 export async function POST(request: Request) {
-  // Allow any authenticated user to upload images
   const { error, status } = await requireAuth(['SUPER_ADMIN', 'ADMIN', 'COACH', 'PLAYER']);
   if (error) return errorResponse(error, status);
 
@@ -22,16 +28,12 @@ export async function POST(request: Request) {
   }
 
   const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  const ext = (file.name.split('.').pop() ?? file.type.split('/')[1]).toLowerCase();
+  const filename = `${randomUUID()}.${ext}`;
 
-  const ext = file.type.split('/')[1];
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  await mkdir(UPLOAD_DIR, { recursive: true });
+  await writeFile(path.join(UPLOAD_DIR, filename), Buffer.from(bytes));
 
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-  await mkdir(uploadDir, { recursive: true });
-
-  const filePath = path.join(uploadDir, filename);
-  await writeFile(filePath, buffer);
-
-  return successResponse({ url: `/uploads/${filename}` }, 201);
+  // Served via /api/uploads/[filename] route
+  return successResponse({ url: `/api/uploads/${filename}` }, 201);
 }
