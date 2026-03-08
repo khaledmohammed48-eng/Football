@@ -2,6 +2,9 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# Prisma requires OpenSSL on Alpine Linux
+RUN apk add --no-cache openssl
+
 # Copy everything first so workspace symlinks resolve correctly
 COPY . .
 
@@ -22,6 +25,9 @@ RUN cd apps/web && npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+
+# Prisma requires OpenSSL at runtime too
+RUN apk add --no-cache openssl
 
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules node_modules/
