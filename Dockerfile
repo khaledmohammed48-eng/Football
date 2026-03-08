@@ -14,6 +14,8 @@ ENV DATABASE_URL=file:/tmp/build.db
 ENV NEXTAUTH_URL=http://localhost:3000
 
 RUN cd apps/web && npx prisma generate
+# Create the build-time SQLite schema so Prisma queries don't fail during pre-rendering
+RUN cd apps/web && npx prisma migrate deploy
 RUN cd apps/web && npm run build
 
 # ── Stage 2: Lean production image ────────────────────────
