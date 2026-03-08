@@ -5,8 +5,14 @@ WORKDIR /app
 # Copy everything first so workspace symlinks resolve correctly
 COPY . .
 
-# Install, dedupe to guarantee single React instance, then build
-RUN npm install --prefer-dedupe
+# Install and build
+RUN npm install
+
+# Dummy build-time env vars so next build doesn't crash on missing secrets
+ENV NEXTAUTH_SECRET=build-placeholder
+ENV DATABASE_URL=file:/tmp/build.db
+ENV NEXTAUTH_URL=http://localhost:3000
+
 RUN cd apps/web && npx prisma generate
 RUN cd apps/web && npm run build
 
