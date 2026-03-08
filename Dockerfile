@@ -2,13 +2,13 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 
-# Prisma needs OpenSSL (included in Debian slim, just ensure it's present)
+# Prisma needs OpenSSL at build time
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copy everything first so workspace symlinks resolve correctly
 COPY . .
 
-# Install and build
+# Install dependencies
 RUN npm install
 
 # Dummy build-time env vars so next build doesn't crash on missing secrets
@@ -16,9 +16,10 @@ ENV NEXTAUTH_SECRET=build-placeholder
 ENV DATABASE_URL=file:/tmp/build.db
 ENV NEXTAUTH_URL=http://localhost:3000
 
+# prisma generate only produces JS/TS client — no native binary execution needed
 RUN cd apps/web && npx prisma generate
-# Create the build-time SQLite schema so Prisma queries don't fail during pre-rendering
-RUN cd apps/web && npx prisma migrate deploy
+
+# Build Next.js (prisma migrate runs at runtime via startup.sh, not here)
 RUN cd apps/web && npm run build
 
 # ── Stage 2: Lean production image ────────────────────────
@@ -26,7 +27,7 @@ FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Prisma needs OpenSSL at runtime too
+# Prisma needs OpenSSL at runtime
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/package*.json ./
