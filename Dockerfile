@@ -2,19 +2,11 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy workspace manifests first (layer cache)
-COPY package*.json ./
-COPY packages/shared/package*.json packages/shared/
-COPY apps/web/package*.json apps/web/
+# Copy everything first so workspace symlinks resolve correctly
+COPY . .
 
-# Install all workspace dependencies and dedupe to avoid duplicate React
-RUN npm install && npm dedupe
-
-# Copy source
-COPY packages/ packages/
-COPY apps/web/ apps/web/
-
-# Generate Prisma client then build Next.js
+# Install, dedupe to guarantee single React instance, then build
+RUN npm install --prefer-dedupe
 RUN cd apps/web && npx prisma generate
 RUN cd apps/web && npm run build
 
