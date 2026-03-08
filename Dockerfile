@@ -1,9 +1,9 @@
 # ── Stage 1: Install & Build ──────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 
-# Prisma requires OpenSSL on Alpine Linux
-RUN apk add --no-cache openssl
+# Prisma needs OpenSSL (included in Debian slim, just ensure it's present)
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copy everything first so workspace symlinks resolve correctly
 COPY . .
@@ -22,12 +22,12 @@ RUN cd apps/web && npx prisma migrate deploy
 RUN cd apps/web && npm run build
 
 # ── Stage 2: Lean production image ────────────────────────
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Prisma requires OpenSSL at runtime too
-RUN apk add --no-cache openssl
+# Prisma needs OpenSSL at runtime too
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules node_modules/
