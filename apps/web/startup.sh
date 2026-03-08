@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+echo "▶ Creating data directories..."
+mkdir -p /data/uploads
+
 echo "▶ Running database migrations..."
 npx prisma migrate deploy
 

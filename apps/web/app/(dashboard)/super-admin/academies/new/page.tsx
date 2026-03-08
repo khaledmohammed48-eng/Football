@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { LogoUpload } from '@/components/ui/logo-upload';
 
 const AGE_GROUPS = ['U8', 'U10', 'U12', 'U14', 'U16', 'U18', 'U21'];
 
@@ -77,11 +78,10 @@ export default function NewAcademyPage() {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">رابط الشعار (اختياري)</label>
-                <input type="text" value={form.logoUrl} onChange={(e) => setForm({ ...form, logoUrl: e.target.value })}
-                  placeholder="https://..." className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
-              </div>
+              <LogoUpload
+                value={form.logoUrl}
+                onChange={(url) => setForm({ ...form, logoUrl: url })}
+              />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">الفئات العمرية *</label>
                 <div className="flex flex-wrap gap-2">
