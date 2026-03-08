@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>معاينة التصميم — منصة الأكاديميات</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Cairo',Arial,sans-serif; background:#0a0f1a; color:#f1f5f9; }
+
+    /* ── Nav ── */
+    .top-nav { background:#111827; border-bottom:2px solid #fbbf24; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .top-nav h1 { font-size:1.1rem; color:#fbbf24; font-weight:900; }
+    .tab-links { display:flex; gap:8px; }
+    .tab-links a { color:#94a3b8; text-decoration:none; font-size:0.82rem; padding:6px 14px; border-radius:20px; border:1px solid #334155; transition:all .2s; }
+    .tab-links a:hover,.tab-links a.active { background:#16a34a; color:#fff; border-color:#16a34a; }
+
+    /* ── Sections ── */
+    .section { padding:60px 40px; max-width:1100px; margin:0 auto; }
+    .sec-title { font-size:0.75rem; font-weight:700; letter-spacing:4px; color:#fbbf24; text-transform:uppercase; margin-bottom:8px; }
+    .sec-heading { font-size:2rem; font-weight:900; color:#fff; margin-bottom:8px; }
+    .sec-sub { font-size:0.9rem; color:#64748b; margin-bottom:48px; }
+
+    /* ── Logo Options Grid ── */
+    .logo-options { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-bottom:48px; }
+    .logo-opt { background:#111827; border:2px solid #1e293b; border-radius:20px; padding:36px 24px; display:flex; flex-direction:column; align-items:center; gap:20px; cursor:pointer; transition:all .25s; position:relative; }
+    .logo-opt:hover { border-color:#16a34a; transform:translateY(-4px); box-shadow:0 20px 40px #16a34a20; }
+    .logo-opt.selected { border-color:#fbbf24; background:#111820; }
+    .logo-opt-label { font-size:0.85rem; font-weight:700; color:#fff; }
+    .logo-opt-desc { font-size:0.72rem; color:#64748b; text-align:center; line-height:1.6; }
+    .badge-new { position:absolute; top:14px; left:14px; background:#16a34a; color:#fff; font-size:0.6rem; font-weight:700; padding:3px 8px; border-radius:20px; letter-spacing:1px; }
+    .badge-rec { position:absolute; top:14px; left:14px; background:#fbbf24; color:#000; font-size:0.6rem; font-weight:700; padding:3px 8px; border-radius:20px; letter-spacing:1px; }
+
+    /* ── On dark / light bg previews ── */
+    .bg-previews { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+    .bg-swatch { border-radius:12px; padding:16px; display:flex; align-items:center; justify-content:center; }
+    .sw-dark { background:#0f172a; }
+    .sw-green { background:linear-gradient(135deg,#052e16,#15803d); }
+    .sw-light { background:#f8fafc; border:1px solid #e2e8f0; }
+    .sw-white { background:#ffffff; border:1px solid #e2e8f0; }
+
+    /* ── Login Mockup ── */
+    .login-frame { display:flex; border-radius:24px; overflow:hidden; box-shadow:0 30px 80px #00000080; max-width:960px; margin:0 auto; }
+    .lf-left { background:linear-gradient(160deg,#020d05,#052e16,#14532d,#166534); padding:52px; flex:1; display:flex; flex-direction:column; justify-content:space-between; min-height:580px; }
+    .lf-right { background:#fff; padding:52px 44px; width:380px; flex-shrink:0; display:flex; flex-direction:column; justify-content:center; }
+    .lf-brand { display:flex; align-items:center; gap:16px; margin-bottom:8px; }
+    .lf-brand-name { font-size:1.2rem; font-weight:900; color:#fff; }
+    .lf-brand-sub { font-size:0.75rem; color:#4ade80; margin-top:2px; }
+    .lf-tag { font-size:0.65rem; color:#16a34a; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:12px; }
+    .lf-headline { font-size:2.4rem; font-weight:900; color:#fff; line-height:1.25; }
+    .lf-headline span { color:#4ade80; }
+    .lf-features { margin-top:28px; list-style:none; }
+    .lf-features li { display:flex; align-items:center; gap:12px; padding:10px 0; color:#d1fae5; font-size:0.875rem; border-bottom:1px solid #166534; }
+    .lf-features li:last-child { border-bottom:none; }
+    .fi { font-size:1.1rem; width:26px; text-align:center; }
+    .lf-join { font-size:0.72rem; color:#4ade80; }
+
+    .rf-hello { font-size:1.7rem; font-weight:900; color:#111; margin-bottom:6px; }
+    .rf-sub { font-size:0.82rem; color:#9ca3af; margin-bottom:32px; }
+    .rf-label { font-size:0.78rem; font-weight:700; color:#374151; margin-bottom:6px; display:block; }
+    .rf-input { width:100%; border:1.5px solid #e5e7eb; border-radius:12px; padding:11px 14px; font-size:0.88rem; direction:ltr; margin-bottom:6px; outline:none; }
+    .rf-hint { font-size:0.68rem; color:#94a3b8; margin-bottom:18px; }
+    .rf-btn { width:100%; background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; font-weight:800; font-size:0.95rem; padding:13px; border-radius:12px; border:none; cursor:pointer; box-shadow:0 6px 20px #16a34a35; letter-spacing:.5px; }
+    .rf-foot { text-align:center; font-size:0.72rem; color:#9ca3af; margin-top:24px; }
+
+    /* ── Sidebar Mockup ── */
+    .dash-frame { display:flex; border-radius:20px; overflow:hidden; box-shadow:0 20px 60px #00000070; max-width:960px; margin:0 auto; min-height:520px; }
+    .dsb { width:260px; background:#0f172a; display:flex; flex-direction:column; flex-shrink:0; }
+    .dsb-logo { padding:20px; border-bottom:1px solid #1e293b; display:flex; align-items:center; gap:12px; }
+    .dsb-name { font-size:0.82rem; font-weight:800; color:#fff; }
+    .dsb-role { font-size:0.68rem; color:#475569; margin-top:2px; }
+    .dsb-nav { flex:1; padding:12px; }
+    .dsb-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; font-size:0.82rem; color:#94a3b8; margin-bottom:2px; }
+    .dsb-item.on { background:#16a34a; color:#fff; font-weight:700; }
+    .dsb-item:not(.on):hover { background:#1e293b; color:#e2e8f0; }
+    .dsb-user { padding:16px; border-top:1px solid #1e293b; display:flex; align-items:center; gap:10px; }
+    .dsb-av { width:34px; height:34px; border-radius:50%; background:#166534; border:2px solid #16a34a; display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:0.85rem; flex-shrink:0; }
+    .dsb-uname { font-size:0.78rem; color:#e2e8f0; font-weight:700; }
+    .dsb-urole { font-size:0.65rem; color:#475569; }
+
+    .main { flex:1; background:#f8fafc; padding:28px; overflow:auto; }
+    .main-h { font-size:1.15rem; font-weight:900; color:#0f172a; margin-bottom:20px; }
+    .stat-g { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px; }
+    .stat { background:#fff; border-radius:14px; padding:18px; border:1px solid #e2e8f0; box-shadow:0 2px 8px #00000008; }
+    .stat-n { font-size:1.9rem; font-weight:900; color:#16a34a; }
+    .stat-l { font-size:0.72rem; color:#64748b; margin-top:2px; }
+    .stat-b { display:inline-block; background:#dcfce7; color:#15803d; font-size:0.62rem; font-weight:700; padding:3px 8px; border-radius:20px; margin-top:6px; }
+    .card { background:#fff; border-radius:14px; padding:16px; border:1px solid #e2e8f0; }
+    .card-title { font-size:0.82rem; font-weight:800; color:#0f172a; margin-bottom:12px; }
+    .activity { font-size:0.75rem; color:#64748b; padding:8px 0; border-bottom:1px solid #f1f5f9; }
+    .activity:last-child { border-bottom:none; }
+    .at-green { color:#16a34a; font-weight:600; }
+    .at-amber { color:#d97706; font-weight:600; }
+
+    /* ── Color Options ── */
+    .color-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .color-card { border-radius:16px; overflow:hidden; box-shadow:0 8px 24px #00000030; cursor:pointer; transition:transform .2s; }
+    .color-card:hover { transform:scale(1.03); }
+    .cc-swatch { height:100px; display:flex; align-items:center; justify-content:center; }
+    .cc-label { padding:12px; text-align:center; }
+    .cc-name { font-size:0.82rem; font-weight:700; color:#fff; }
+    .cc-desc { font-size:0.68rem; color:#64748b; margin-top:3px; }
+    .cc-bg { background:#1e293b; }
+
+    .divider { height:1px; background:linear-gradient(to right,transparent,#334155,transparent); margin:0 40px; }
+    footer { text-align:center; padding:32px; color:#334155; font-size:0.75rem; }
+  </style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<div class="top-nav">
+  <h1>🎨 معاينة التصميم — منصة الأكاديميات</h1>
+  <div class="tab-links">
+    <a href="#logos" class="active">الشعارات</a>
+    <a href="#login">صفحة الدخول</a>
+    <a href="#dashboard">لوحة التحكم</a>
+    <a href="#colors">الألوان</a>
+  </div>
+</div>
+
+<!-- ═══════════════ LOGO OPTIONS ═══════════════ -->
+<div class="section" id="logos">
+  <div class="sec-title">Logo Design</div>
+  <div class="sec-heading">اختر تصميم الشعار</div>
+  <div class="sec-sub">ثلاثة خيارات مختلفة — اضغط على أي منها لاختياره</div>
+
+  <div class="logo-options">
+
+    <!-- Option 1 — Circular Badge (current) -->
+    <div class="logo-opt selected">
+      <div class="badge-rec">✓ الحالي</div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="140" height="140">
+        <defs>
+          <radialGradient id="g1a" cx="35%" cy="25%" r="75%"><stop offset="0%" stop-color="#4ade80"/><stop offset="60%" stop-color="#16a34a"/><stop offset="100%" stop-color="#14532d"/></radialGradient>
+          <linearGradient id="g2a" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fde68a"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#d97706"/></linearGradient>
+          <radialGradient id="g3a" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#f9fafb"/><stop offset="100%" stop-color="#d1d5db"/></radialGradient>
+          <radialGradient id="g4a" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#15803d"/></radialGradient>
+          <clipPath id="c1a"><circle cx="100" cy="100" r="62"/></clipPath>
+        </defs>
+        <circle cx="100" cy="100" r="96" fill="url(#g1a)"/>
+        <circle cx="100" cy="100" r="90" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.25"/>
+        <circle cx="100" cy="100" r="62" fill="url(#g4a)"/>
+        <g clip-path="url(#c1a)" opacity="0.1"><rect x="38" y="38" width="18" height="124" fill="#fff"/><rect x="74" y="38" width="18" height="124" fill="#fff"/><rect x="110" y="38" width="18" height="124" fill="#fff"/><rect x="146" y="38" width="18" height="124" fill="#fff"/></g>
+        <circle cx="100" cy="100" r="22" fill="none" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
+        <line x1="38" y1="100" x2="162" y2="100" stroke="#fff" stroke-width="1.2" opacity="0.5"/>
+        <circle cx="100" cy="100" r="2" fill="#fff" opacity="0.6"/>
+        <rect x="38" y="84" width="16" height="32" fill="none" stroke="#fff" stroke-width="1" opacity="0.4"/>
+        <rect x="146" y="84" width="16" height="32" fill="none" stroke="#fff" stroke-width="1" opacity="0.4"/>
+        <circle cx="100" cy="100" r="24" fill="url(#g3a)" stroke="#9ca3af" stroke-width="0.5"/>
+        <path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#1f2937" opacity="0.8"/>
+        <path d="M100,123 Q110,112 100,100 Q90,112 100,123" fill="#1f2937" opacity="0.8"/>
+        <path d="M77,100 Q88,90 100,100 Q88,110 77,100" fill="#1f2937" opacity="0.8"/>
+        <path d="M123,100 Q112,90 100,100 Q112,110 123,100" fill="#1f2937" opacity="0.8"/>
+        <ellipse cx="92" cy="89" rx="5" ry="3.5" fill="#fff" opacity="0.4" transform="rotate(-30,92,89)"/>
+        <polygon points="72,46 74,53 81,53 75.5,57 77.5,64 72,60 66.5,64 68.5,57 63,53 70,53" fill="url(#g2a)" opacity="0.95"/>
+        <polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="url(#g2a)"/>
+        <polygon points="128,46 130,53 137,53 131.5,57 133.5,64 128,60 122.5,64 124.5,57 119,53 126,53" fill="url(#g2a)" opacity="0.95"/>
+        <circle cx="100" cy="100" r="96" fill="none" stroke="url(#g2a)" stroke-width="2.5" opacity="0.5"/>
+        <path id="arc1a" d="M 26,130 A 80,80 0 0,0 174,130" fill="none"/>
+        <text font-family="Arial" font-size="11" font-weight="800" fill="#fff" opacity="0.9" letter-spacing="3"><textPath href="#arc1a" startOffset="12%">ACADEMY  SYSTEM</textPath></text>
+      </svg>
+      <div class="logo-opt-label">شارة دائرية</div>
+      <div class="logo-opt-desc">تدرج أخضر مع ملعب كرة قدم وكرة في المنتصف وثلاثة نجوم ذهبية</div>
+      <div class="bg-previews">
+        <div class="bg-swatch sw-dark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36"><circle cx="100" cy="100" r="96" fill="#16a34a"/><circle cx="100" cy="100" r="62" fill="#15803d"/><circle cx="100" cy="100" r="24" fill="#f9fafb"/><path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#1f2937" opacity="0.8"/><polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="#f59e0b"/></svg></div>
+        <div class="bg-swatch sw-green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36"><circle cx="100" cy="100" r="96" fill="#16a34a"/><circle cx="100" cy="100" r="62" fill="#15803d"/><circle cx="100" cy="100" r="24" fill="#f9fafb"/><path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#1f2937" opacity="0.8"/><polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="#f59e0b"/></svg></div>
+        <div class="bg-swatch sw-light"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36"><circle cx="100" cy="100" r="96" fill="#16a34a"/><circle cx="100" cy="100" r="62" fill="#15803d"/><circle cx="100" cy="100" r="24" fill="#f9fafb"/><path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#1f2937" opacity="0.8"/><polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="#f59e0b"/></svg></div>
+      </div>
+    </div>
+
+    <!-- Option 2 — Shield + Arabic text -->
+    <div class="logo-opt">
+      <div class="badge-new">جديد</div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="126" height="140">
+        <defs>
+          <linearGradient id="sg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#052e16"/></linearGradient>
+          <linearGradient id="sg2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#b45309"/></linearGradient>
+        </defs>
+        <!-- Shield -->
+        <path d="M100 8 L186 40 L186 110 Q186 175 100 208 Q14 175 14 110 L14 40 Z" fill="url(#sg1)" stroke="#052e16" stroke-width="2"/>
+        <!-- Shield inner border -->
+        <path d="M100 20 L174 48 L174 110 Q174 165 100 195 Q26 165 26 110 L26 48 Z" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.2"/>
+        <!-- Gold band across top -->
+        <path d="M14 58 L186 58 L186 40 L100 8 L14 40 Z" fill="url(#sg2)" opacity="0.25"/>
+        <!-- Football -->
+        <circle cx="100" cy="118" r="38" fill="#1a3a1a" opacity="0.3"/>
+        <circle cx="100" cy="115" r="36" fill="#f1f5f9" stroke="#9ca3af" stroke-width="0.8"/>
+        <!-- Ball patches -->
+        <path d="M100,80 Q113,95 100,115 Q87,95 100,80" fill="#111827" opacity="0.85"/>
+        <path d="M100,150 Q113,135 100,115 Q87,135 100,150" fill="#111827" opacity="0.85"/>
+        <path d="M65,115 Q80,102 100,115 Q80,128 65,115" fill="#111827" opacity="0.85"/>
+        <path d="M135,115 Q120,102 100,115 Q120,128 135,115" fill="#111827" opacity="0.85"/>
+        <ellipse cx="90" cy="100" rx="7" ry="4.5" fill="#fff" opacity="0.4" transform="rotate(-25,90,100)"/>
+        <!-- Stars -->
+        <polygon points="80,36 82,43 89,43 83.5,47 85.5,54 80,50 74.5,54 76.5,47 71,43 78,43" fill="url(#sg2)"/>
+        <polygon points="100,30 102.5,38.5 111,38.5 104.5,43.5 107,52 100,47 93,52 95.5,43.5 89,38.5 97.5,38.5" fill="url(#sg2)"/>
+        <polygon points="120,36 122,43 129,43 123.5,47 125.5,54 120,50 114.5,54 116.5,47 111,43 118,43" fill="url(#sg2)"/>
+        <!-- Arabic text on shield bottom -->
+        <text x="100" y="175" text-anchor="middle" font-family="Arial" font-size="13" font-weight="900" fill="#ffffff" opacity="0.9">أكاديمية</text>
+        <text x="100" y="193" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="#fbbf24" opacity="0.9">كرة القدم</text>
+      </svg>
+      <div class="logo-opt-label">درع بالعربية</div>
+      <div class="logo-opt-desc">شكل درع كلاسيكي مع كرة كبيرة ونص عربي "أكاديمية كرة القدم"</div>
+      <div class="bg-previews">
+        <div class="bg-swatch sw-dark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="32" height="36"><path d="M100 8 L186 40 L186 110 Q186 175 100 208 Q14 175 14 110 L14 40 Z" fill="#16a34a"/><circle cx="100" cy="115" r="36" fill="#f1f5f9"/><path d="M100,80 Q113,95 100,115 Q87,95 100,80" fill="#111827" opacity="0.85"/><polygon points="100,30 102.5,38.5 111,38.5 104.5,43.5 107,52 100,47 93,52 95.5,43.5 89,38.5 97.5,38.5" fill="#f59e0b"/></svg></div>
+        <div class="bg-swatch sw-green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="32" height="36"><path d="M100 8 L186 40 L186 110 Q186 175 100 208 Q14 175 14 110 L14 40 Z" fill="#15803d" stroke="#4ade80" stroke-width="2"/><circle cx="100" cy="115" r="36" fill="#f1f5f9"/><path d="M100,80 Q113,95 100,115 Q87,95 100,80" fill="#111827" opacity="0.85"/><polygon points="100,30 102.5,38.5 111,38.5 104.5,43.5 107,52 100,47 93,52 95.5,43.5 89,38.5 97.5,38.5" fill="#f59e0b"/></svg></div>
+        <div class="bg-swatch sw-light"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="32" height="36"><path d="M100 8 L186 40 L186 110 Q186 175 100 208 Q14 175 14 110 L14 40 Z" fill="#16a34a"/><circle cx="100" cy="115" r="36" fill="#f1f5f9"/><path d="M100,80 Q113,95 100,115 Q87,95 100,80" fill="#111827" opacity="0.85"/><polygon points="100,30 102.5,38.5 111,38.5 104.5,43.5 107,52 100,47 93,52 95.5,43.5 89,38.5 97.5,38.5" fill="#f59e0b"/></svg></div>
+      </div>
+    </div>
+
+    <!-- Option 3 — Modern Minimal -->
+    <div class="logo-opt">
+      <div class="badge-new">جديد</div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="140" height="140">
+        <defs>
+          <linearGradient id="mg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#15803d"/></linearGradient>
+          <linearGradient id="mg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#d97706"/></linearGradient>
+        </defs>
+        <!-- Hexagon background -->
+        <polygon points="100,4 188,52 188,148 100,196 12,148 12,52" fill="#0f2d1a"/>
+        <polygon points="100,14 178,58 178,142 100,186 22,142 22,58" fill="none" stroke="url(#mg1)" stroke-width="2.5"/>
+        <!-- Inner hex -->
+        <polygon points="100,28 166,66 166,134 100,172 34,134 34,66" fill="#0a1f0f"/>
+        <!-- Green accent lines -->
+        <line x1="100" y1="28" x2="100" y2="172" stroke="url(#mg1)" stroke-width="1" opacity="0.3"/>
+        <line x1="34" y1="66" x2="166" y2="134" stroke="url(#mg1)" stroke-width="1" opacity="0.3"/>
+        <line x1="166" y1="66" x2="34" y2="134" stroke="url(#mg1)" stroke-width="1" opacity="0.3"/>
+        <!-- Big stylized ball -->
+        <circle cx="100" cy="100" r="38" fill="url(#mg1)" opacity="0.15"/>
+        <circle cx="100" cy="100" r="34" fill="none" stroke="url(#mg1)" stroke-width="2.5"/>
+        <!-- Simplified ball patches -->
+        <circle cx="100" cy="100" r="12" fill="url(#mg1)" opacity="0.9"/>
+        <circle cx="100" cy="68" r="7" fill="url(#mg1)" opacity="0.6"/>
+        <circle cx="100" cy="132" r="7" fill="url(#mg1)" opacity="0.6"/>
+        <circle cx="70" cy="100" r="7" fill="url(#mg1)" opacity="0.6"/>
+        <circle cx="130" cy="100" r="7" fill="url(#mg1)" opacity="0.6"/>
+        <!-- Gold star -->
+        <polygon points="100,54 102,60 108,60 103,64 105,70 100,66 95,70 97,64 92,60 98,60" fill="url(#mg2)" opacity="0.9"/>
+        <!-- Gold dots -->
+        <circle cx="77" cy="77" r="3" fill="url(#mg2)" opacity="0.7"/>
+        <circle cx="123" cy="77" r="3" fill="url(#mg2)" opacity="0.7"/>
+        <circle cx="77" cy="123" r="3" fill="url(#mg2)" opacity="0.7"/>
+        <circle cx="123" cy="123" r="3" fill="url(#mg2)" opacity="0.7"/>
+        <!-- Text -->
+        <text x="100" y="154" text-anchor="middle" font-family="Arial" font-size="8.5" font-weight="900" fill="#4ade80" letter-spacing="3">ACADEMY</text>
+      </svg>
+      <div class="logo-opt-label">سداسي عصري</div>
+      <div class="logo-opt-desc">شكل سداسي أنيق بخطوط هندسية وكرة مُنمّقة — تصميم عصري</div>
+      <div class="bg-previews">
+        <div class="bg-swatch sw-dark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36"><polygon points="100,4 188,52 188,148 100,196 12,148 12,52" fill="#0f2d1a"/><polygon points="100,14 178,58 178,142 100,186 22,142 22,58" fill="none" stroke="#22c55e" stroke-width="2.5"/><circle cx="100" cy="100" r="34" fill="none" stroke="#22c55e" stroke-width="2"/><circle cx="100" cy="100" r="12" fill="#22c55e" opacity="0.9"/><polygon points="100,54 102,60 108,60 103,64 105,70 100,66 95,70 97,64 92,60 98,60" fill="#f59e0b"/></svg></div>
+        <div class="bg-swatch sw-green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36"><polygon points="100,4 188,52 188,148 100,196 12,148 12,52" fill="#052e16"/><polygon points="100,14 178,58 178,142 100,186 22,142 22,58" fill="none" stroke="#4ade80" stroke-width="2.5"/><circle cx="100" cy="100" r="34" fill="none" stroke="#4ade80" stroke-width="2"/><circle cx="100" cy="100" r="12" fill="#4ade80" opacity="0.9"/><polygon points="100,54 102,60 108,60 103,64 105,70 100,66 95,70 97,64 92,60 98,60" fill="#f59e0b"/></svg></div>
+        <div class="bg-swatch sw-light"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36"><polygon points="100,4 188,52 188,148 100,196 12,148 12,52" fill="#0f2d1a"/><polygon points="100,14 178,58 178,142 100,186 22,142 22,58" fill="none" stroke="#16a34a" stroke-width="2.5"/><circle cx="100" cy="100" r="34" fill="none" stroke="#16a34a" stroke-width="2"/><circle cx="100" cy="100" r="12" fill="#16a34a" opacity="0.9"/><polygon points="100,54 102,60 108,60 103,64 105,70 100,66 95,70 97,64 92,60 98,60" fill="#f59e0b"/></svg></div>
+      </div>
+    </div>
+
+  </div><!-- /logo-options -->
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ LOGIN PAGE ═══════════════ -->
+<div class="section" id="login">
+  <div class="sec-title">Login Page</div>
+  <div class="sec-heading">صفحة تسجيل الدخول</div>
+  <div class="sec-sub">تصميم جديد — لوحتان: الأيسر للعلامة التجارية، الأيمن لنموذج الدخول</div>
+
+  <div class="login-frame">
+    <div class="lf-left">
+      <div>
+        <div class="lf-brand">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="60" height="60"><defs><radialGradient id="lg1" cx="35%" cy="25%" r="75%"><stop offset="0%" stop-color="#4ade80"/><stop offset="60%" stop-color="#16a34a"/><stop offset="100%" stop-color="#14532d"/></radialGradient><radialGradient id="lbg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#15803d"/></radialGradient></defs><circle cx="100" cy="100" r="96" fill="url(#lg1)"/><circle cx="100" cy="100" r="90" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.2"/><circle cx="100" cy="100" r="62" fill="url(#lbg)"/><circle cx="100" cy="100" r="22" fill="none" stroke="#fff" stroke-width="1.2" opacity="0.5"/><line x1="38" y1="100" x2="162" y2="100" stroke="#fff" stroke-width="1.2" opacity="0.5"/><circle cx="100" cy="100" r="24" fill="#f9fafb" stroke="#9ca3af" stroke-width="0.5"/><path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#1f2937" opacity="0.8"/><path d="M100,123 Q110,112 100,100 Q90,112 100,123" fill="#1f2937" opacity="0.8"/><path d="M77,100 Q88,90 100,100 Q88,110 77,100" fill="#1f2937" opacity="0.8"/><path d="M123,100 Q112,90 100,100 Q112,110 123,100" fill="#1f2937" opacity="0.8"/><polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="#f59e0b"/><circle cx="100" cy="100" r="96" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.4"/></svg>
+          <div>
+            <div class="lf-brand-name">منصة الأكاديميات</div>
+            <div class="lf-brand-sub">إدارة ذكية لكرة القدم</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lf-tag">Football Academy System</div>
+        <div class="lf-headline">أدِر أكاديميتك<br/><span>باحترافية كاملة</span></div>
+        <ul class="lf-features">
+          <li><span class="fi">⚽</span> تتبع أداء اللاعبين وتطورهم</li>
+          <li><span class="fi">📊</span> جدولة التدريبات وإدارة الفرق</li>
+          <li><span class="fi">⚔️</span> تنظيم مباريات بين الأكاديميات</li>
+          <li><span class="fi">📈</span> لوحة إحصائيات وترتيب شامل</li>
+          <li><span class="fi">📥</span> استيراد اللاعبين من Excel</li>
+        </ul>
+      </div>
+      <div class="lf-join">
+        هل تريد الانضمام بأكاديميتك؟<br/>
+        <span style="font-size:0.85rem;font-weight:900;color:#86efac;direction:ltr;display:inline-block;margin-top:4px;">📞 0550899901</span>
+      </div>
+    </div>
+    <div class="lf-right" dir="rtl">
+      <div class="rf-hello">مرحباً بك 👋</div>
+      <div class="rf-sub">سجّل دخولك للوصول إلى لوحة التحكم</div>
+      <label class="rf-label">رقم الجوال أو البريد الإلكتروني</label>
+      <input class="rf-input" type="text" placeholder="05xxxxxxxx أو example@academy.com" disabled/>
+      <div class="rf-hint">اللاعبون: رقم الجوال — المدربون والإدارة: البريد الإلكتروني</div>
+      <label class="rf-label">كلمة المرور</label>
+      <input class="rf-input" type="password" placeholder="••••••••" disabled/>
+      <button class="rf-btn" style="margin-top:8px">تسجيل الدخول ←</button>
+      <div class="rf-foot">
+        هل تريد الانضمام بأكاديميتك؟<br/>
+        <a href="tel:0550899901" style="direction:ltr;display:inline-block;margin-top:3px;color:#16a34a;font-weight:900;font-size:0.9rem;text-decoration:none;">📞 0550899901</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div class="section" id="dashboard">
+  <div class="sec-title">Dashboard</div>
+  <div class="sec-heading">لوحة التحكم — الشريط الجانبي</div>
+  <div class="sec-sub">الشعار يظهر في أعلى الشريط الجانبي مع اسم الأكاديمية وصورة المستخدم أسفله</div>
+
+  <div class="dash-frame">
+    <div class="dsb">
+      <div class="dsb-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="42" height="42"><defs><radialGradient id="dg1" cx="35%" cy="25%" r="75%"><stop offset="0%" stop-color="#4ade80"/><stop offset="60%" stop-color="#16a34a"/><stop offset="100%" stop-color="#14532d"/></radialGradient><radialGradient id="dbg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#15803d"/></radialGradient></defs><circle cx="100" cy="100" r="96" fill="url(#dg1)"/><circle cx="100" cy="100" r="62" fill="url(#dbg)"/><circle cx="100" cy="100" r="22" fill="none" stroke="#fff" stroke-width="1.2" opacity="0.5"/><line x1="38" y1="100" x2="162" y2="100" stroke="#fff" stroke-width="1.2" opacity="0.5"/><circle cx="100" cy="100" r="24" fill="#f9fafb" stroke="#9ca3af" stroke-width="0.5"/><path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#1f2937" opacity="0.8"/><path d="M77,100 Q88,90 100,100 Q88,110 77,100" fill="#1f2937" opacity="0.8"/><polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="#f59e0b"/><circle cx="100" cy="100" r="96" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.4"/></svg>
+        <div>
+          <div class="dsb-name">أكاديمية النجوم</div>
+          <div class="dsb-role">مدير الأكاديمية</div>
+        </div>
+      </div>
+      <div class="dsb-nav">
+        <div class="dsb-item on"><span>🏠</span> لوحة التحكم</div>
+        <div class="dsb-item"><span>🏆</span> الفرق</div>
+        <div class="dsb-item"><span>⚽</span> اللاعبون</div>
+        <div class="dsb-item"><span>👨‍💼</span> المدربون</div>
+        <div class="dsb-item"><span>⚔️</span> طلبات المباريات</div>
+        <div class="dsb-item"><span>📊</span> الترتيب</div>
+        <div class="dsb-item"><span>🏟️</span> ملف الأكاديمية</div>
+        <div class="dsb-item"><span>⚙️</span> الإعدادات</div>
+      </div>
+      <div class="dsb-user">
+        <div class="dsb-av">خ</div>
+        <div>
+          <div class="dsb-uname">خالد العتيبي</div>
+          <div class="dsb-urole">مدير أكاديمية</div>
+        </div>
+      </div>
+    </div>
+    <div class="main" dir="rtl">
+      <div class="main-h">🏠 لوحة التحكم الرئيسية</div>
+      <div class="stat-g">
+        <div class="stat"><div class="stat-n">48</div><div class="stat-l">إجمالي اللاعبين</div><span class="stat-b">↑ 5 هذا الشهر</span></div>
+        <div class="stat"><div class="stat-n">4</div><div class="stat-l">الفرق النشطة</div><span class="stat-b">✓ منظّمة</span></div>
+        <div class="stat"><div class="stat-n">6</div><div class="stat-l">المدربون</div><span class="stat-b">✓ جميعهم نشطون</span></div>
+        <div class="stat"><div class="stat-n">3</div><div class="stat-l">مباريات قادمة</div><span class="stat-b">⚔️ هذا الأسبوع</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 آخر الأنشطة</div>
+        <div class="activity">⚽ تم إضافة لاعب جديد: <b>أحمد محمد</b> — <span class="at-green">منذ ساعة</span></div>
+        <div class="activity">⚔️ طلب مباراة من <b>أكاديمية الهلال</b> — <span class="at-amber">بانتظار الموافقة</span></div>
+        <div class="activity">📥 تم استيراد <b>12 لاعب</b> من Excel — <span class="at-green">اليوم</span></div>
+        <div class="activity">👨‍💼 تم تعيين المدرب <b>سعد الغامدي</b> لفريق تحت 15 — <span class="at-green">أمس</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════ COLOR OPTIONS ═══════════════ -->
+<div class="section" id="colors">
+  <div class="sec-title">Color Themes</div>
+  <div class="sec-heading">خيارات الألوان</div>
+  <div class="sec-sub">أي نظام ألوان تفضل للشعار والواجهة؟</div>
+
+  <div class="color-grid">
+    <div class="color-card">
+      <div class="cc-swatch" style="background:linear-gradient(135deg,#052e16,#16a34a,#4ade80)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="64" height="64"><circle cx="100" cy="100" r="96" fill="#16a34a"/><circle cx="100" cy="100" r="62" fill="#15803d"/><circle cx="100" cy="100" r="24" fill="#f9fafb"/><path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#111"/><polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="#f59e0b"/></svg>
+      </div>
+      <div class="cc-label cc-bg"><div class="cc-name">🟢 الأخضر الذهبي</div><div class="cc-desc">التصميم الحالي — كلاسيكي رياضي</div></div>
+    </div>
+    <div class="color-card">
+      <div class="cc-swatch" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8,#60a5fa)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="64" height="64"><circle cx="100" cy="100" r="96" fill="#1d4ed8"/><circle cx="100" cy="100" r="62" fill="#1e40af"/><circle cx="100" cy="100" r="24" fill="#f9fafb"/><path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#111"/><polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="#fbbf24"/></svg>
+      </div>
+      <div class="cc-label cc-bg"><div class="cc-name">🔵 الأزرق الملكي</div><div class="cc-desc">نظام أزرق داكن مع ذهبي</div></div>
+    </div>
+    <div class="color-card">
+      <div class="cc-swatch" style="background:linear-gradient(135deg,#3b0764,#7c3aed,#a78bfa)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="64" height="64"><circle cx="100" cy="100" r="96" fill="#7c3aed"/><circle cx="100" cy="100" r="62" fill="#6d28d9"/><circle cx="100" cy="100" r="24" fill="#f9fafb"/><path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#111"/><polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="#fbbf24"/></svg>
+      </div>
+      <div class="cc-label cc-bg"><div class="cc-name">🟣 البنفسجي</div><div class="cc-desc">عصري جريء مع نجوم ذهبية</div></div>
+    </div>
+    <div class="color-card">
+      <div class="cc-swatch" style="background:linear-gradient(135deg,#1c0a02,#b45309,#fbbf24)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="64" height="64"><circle cx="100" cy="100" r="96" fill="#b45309"/><circle cx="100" cy="100" r="62" fill="#92400e"/><circle cx="100" cy="100" r="24" fill="#f9fafb"/><path d="M100,77 Q110,88 100,100 Q90,88 100,77" fill="#111"/><polygon points="100,40 102.5,48.5 111,48.5 104.5,53.5 107,62 100,57.5 93,62 95.5,53.5 89,48.5 97.5,48.5" fill="#fde68a"/></svg>
+      </div>
+      <div class="cc-label cc-bg"><div class="cc-name">🟡 الذهبي الداكن</div><div class="cc-desc">فاخر — ذهبي وبني غامق</div></div>
+    </div>
+  </div>
+</div>
+
+<footer>منصة إدارة أكاديميات كرة القدم &nbsp;•&nbsp; جميع الحقوق محفوظة © 2026</footer>
+
+</body>
+</html>

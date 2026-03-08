@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="outerGrad" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f0fdf4"/>
+    </radialGradient>
+    <radialGradient id="innerGrad" cx="35%" cy="25%" r="75%">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="60%" stop-color="#14532d"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="40%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+    <radialGradient id="ballGrad" cx="35%" cy="28%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e5e7eb"/>
+    </radialGradient>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00000050"/>
+    </filter>
+    <clipPath id="pitchClip">
+      <circle cx="100" cy="100" r="46"/>
+    </clipPath>
+  </defs>
+
+  <!-- Outer white badge frame -->
+  <circle cx="100" cy="100" r="97" fill="url(#outerGrad)" filter="url(#shadow)"/>
+
+  <!-- Gold border rings -->
+  <circle cx="100" cy="100" r="94" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
+  <circle cx="100" cy="100" r="90" fill="none" stroke="url(#goldGrad)" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Deep green inner -->
+  <circle cx="100" cy="100" r="86" fill="url(#innerGrad)"/>
+  <circle cx="100" cy="100" r="78" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.12"/>
+
+  <!-- Football pitch -->
+  <circle cx="100" cy="100" r="46" fill="#15803d"/>
+  <g clip-path="url(#pitchClip)" opacity="0.14">
+    <rect x="54" y="54" width="11" height="92" fill="#ffffff"/>
+    <rect x="76" y="54" width="11" height="92" fill="#ffffff"/>
+    <rect x="98" y="54" width="11" height="92" fill="#ffffff"/>
+    <rect x="120" y="54" width="11" height="92" fill="#ffffff"/>
+  </g>
+  <circle cx="100" cy="100" r="16" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+  <line x1="54" y1="100" x2="146" y2="100" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+  <rect x="54" y="90" width="10" height="20" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.4"/>
+  <rect x="136" y="90" width="10" height="20" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Football -->
+  <circle cx="100" cy="100" r="18" fill="url(#ballGrad)" stroke="#d1d5db" stroke-width="0.5"/>
+  <path d="M100,83 Q107,89 105,98 Q100,101 95,98 Q93,89 100,83" fill="#1f2937" opacity="0.7"/>
+  <path d="M113,106 Q108,114 100,114 Q95,110 96,104 Q101,100 107,102Z" fill="#1f2937" opacity="0.7"/>
+  <path d="M87,106 Q82,114 87,117 Q91,112 93,105 Q89,101 87,106Z" fill="#1f2937" opacity="0.55"/>
+  <ellipse cx="93" cy="89" rx="4" ry="2.5" fill="#ffffff" opacity="0.6" transform="rotate(-25,93,89)"/>
+
+  <!-- Gold stars -->
+  <g fill="url(#goldGrad)">
+    <polygon points="72,47 73.8,53 80,53 75,56.5 76.8,63 72,59.5 67.2,63 69,56.5 64,53 70.2,53"/>
+    <polygon points="100,40 102.3,48 110,48 104,52.5 106.3,61 100,56.8 93.7,61 96,52.5 90,48 97.7,48"/>
+    <polygon points="128,47 129.8,53 136,53 131,56.5 132.8,63 128,59.5 123.2,63 125,56.5 120,53 126.2,53"/>
+  </g>
+
+  <!-- Bottom text -->
+  <path id="arc1" d="M 30,135 A 75,75 0 0,0 170,135" fill="none"/>
+  <text font-family="'Arial Black', Arial, sans-serif" font-size="10" font-weight="900" fill="#facc15" letter-spacing="3">
+    <textPath href="#arc1" startOffset="18%">MY  ACADEMY</textPath>
+  </text>
+
+  <!-- Bottom accent -->
+  <circle cx="100" cy="170" r="2.5" fill="#facc15"/>
+</svg>

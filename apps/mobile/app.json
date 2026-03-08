@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "أكاديمية كرة القدم",
+    "slug": "football-academy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#16a34a"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.footballacademy.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#16a34a"
+      },
+      "package": "com.footballacademy.app"
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "scheme": "football-academy",
+    "extra": {
+      "apiUrl": "http://localhost:3000"
+    }
+  }
+}

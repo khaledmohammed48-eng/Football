@@ -1,0 +1,11 @@
+node_modules
+.next
+*.log
+.env
+.env.local
+.env.production
+apps/web/prisma/*.db
+apps/web/prisma/*.db-journal
+apps/mobile
+.claude
+.git

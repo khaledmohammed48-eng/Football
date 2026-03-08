@@ -1,0 +1,19 @@
+import type { AttributeKey } from '../types/attributes';
+
+export const ATTRIBUTE_LABELS: Record<AttributeKey, string> = {
+  speed: 'السرعة',
+  passing: 'التمرير',
+  shooting: 'التسديد',
+  dribbling: 'المراوغة',
+  defense: 'الدفاع',
+  stamina: 'التحمل',
+};
+
+export const ATTRIBUTE_COLORS: Record<AttributeKey, string> = {
+  speed: '#f97316',
+  passing: '#3b82f6',
+  shooting: '#ef4444',
+  dribbling: '#8b5cf6',
+  defense: '#22c55e',
+  stamina: '#f59e0b',
+};

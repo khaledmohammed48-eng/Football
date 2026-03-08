@@ -1,0 +1,320 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// MODELS  (SQLite-compatible - enums stored as String)
+// Role values:     SUPER_ADMIN | ADMIN | COACH | PLAYER
+// Position values: GOALKEEPER | DEFENDER | MIDFIELDER | FORWARD
+// ============================================================
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  role         String   // SUPER_ADMIN | ADMIN | COACH | PLAYER
+  mobile       String?
+  photoUrl     String?  // Profile photo (used for ADMIN and SUPER_ADMIN; COACH/PLAYER use their own table)
+  academyId    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdById  String?
+
+  academy      Academy? @relation(fields: [academyId], references: [id], onDelete: SetNull)
+  coach        Coach?
+  player       Player?
+  createdBy      User?          @relation("AccountCreation", fields: [createdById], references: [id])
+  createdUsers   User[]         @relation("AccountCreation")
+  notifications  Notification[]
+
+  @@map("users")
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  logoUrl     String?
+  academyId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  academy           Academy?           @relation(fields: [academyId], references: [id], onDelete: SetNull)
+  coaches           Coach[]
+  players           Player[]
+  attendanceRecords AttendanceRecord[]
+  trainingGroups    TrainingGroup[]
+  sessionPlans      SessionPlan[]
+  leagueTeams       LeagueTeam[]
+
+  @@map("teams")
+}
+
+model Coach {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  name      String
+  photoUrl  String?
+  phone     String?
+  teamId    String?
+  academyId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  academy           Academy?           @relation(fields: [academyId], references: [id], onDelete: SetNull)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team              Team?              @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  notes             CoachNote[]
+  attendanceRecords AttendanceRecord[]
+  trainingGroups    TrainingGroup[]
+  sessionPlans      SessionPlan[]
+
+  @@map("coaches")
+}
+
+model Player {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  name            String
+  photoUrl        String?
+  dateOfBirth     DateTime?
+  position        String?   // GOALKEEPER | DEFENDER | MIDFIELDER | FORWARD
+  phone           String?
+  guardianName    String?
+  guardianPhone   String?
+  teamId          String?
+  academyId       String?
+  isActive        Boolean   @default(true)
+  subscriptionEnd DateTime? // null = no expiry set
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  academy    Academy?         @relation(fields: [academyId], references: [id], onDelete: SetNull)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team       Team?            @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  attributes PlayerAttribute?
+  notes      CoachNote[]
+
+  @@map("players")
+}
+
+model PlayerAttribute {
+  id        String   @id @default(cuid())
+  playerId  String   @unique
+  speed     Int      @default(5)
+  passing   Int      @default(5)
+  shooting  Int      @default(5)
+  dribbling Int      @default(5)
+  defense   Int      @default(5)
+  stamina   Int      @default(5)
+  updatedAt DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("player_attributes")
+}
+
+model CoachNote {
+  id        String   @id @default(cuid())
+  content   String
+  playerId  String
+  coachId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  coach  Coach  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@map("coach_notes")
+}
+
+// ── New models (Phase 1 addition) ─────────────────────────────────────────────
+
+model AttendanceRecord {
+  id               String @id @default(cuid())
+  coachId          String
+  teamId           String
+  date             String   // "YYYY-MM-DD" — avoids timezone issues in SQLite
+  presentPlayerIds String   @default("[]") // JSON string array of player IDs
+
+  coach Coach @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  team  Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([coachId, teamId, date])
+  @@map("attendance_records")
+}
+
+model TrainingGroup {
+  id        String   @id @default(cuid())
+  coachId   String
+  teamId    String
+  name      String
+  type      String   @default("TEMPORARY") // "TEMPORARY" | "PERMANENT"
+  playerIds String   @default("[]")        // JSON string array of player IDs
+  captainId String?                        // single playerId string
+  formation String?                        // e.g. "11: 4-3-3" — matches TacticalBoard key
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  coach        Coach         @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  team         Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  sessionPlans SessionPlan[]
+
+  @@map("training_groups")
+}
+
+model SessionPlan {
+  id            String   @id @default(cuid())
+  coachId       String
+  teamId        String
+  title         String
+  date          DateTime
+  description   String?
+  exercises     String   @default("[]") // JSON array: [{name,duration,notes}]
+  targetGroupId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  coach       Coach          @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  team        Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  targetGroup TrainingGroup? @relation(fields: [targetGroupId], references: [id], onDelete: SetNull)
+
+  @@map("session_plans")
+}
+
+// ── Multi-academy models (Phase 2 addition) ───────────────────────────────────
+
+model Academy {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String?
+  location  String?
+  city      String?
+  ageGroups String   @default("[]") // JSON: ["U8","U10","U12","U14","U16","U18","U21"]
+  banners   String   @default("[]") // JSON: [{url,title?,link?}]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users            User[]
+  teams            Team[]
+  coaches          Coach[]
+  players          Player[]
+  sentRequests     MatchRequest[] @relation("FromAcademy")
+  receivedRequests MatchRequest[] @relation("ToAcademy")
+  leagues          League[]
+  leagueTeams      LeagueTeam[]
+
+  @@map("academies")
+}
+
+model MatchRequest {
+  id            String   @id @default(cuid())
+  fromAcademyId String
+  toAcademyId   String
+  ageGroup      String   // "U8" | "U10" | "U12" | "U14" | "U16" | "U18" | "U21"
+  proposedDate  DateTime
+  location      String?
+  homeOrAway    String   // "HOME" | "AWAY"
+  status        String   @default("PENDING") // "PENDING" | "ACCEPTED" | "REJECTED"
+  notes         String?
+  homeScore     Int?     // filled after the match is played
+  awayScore     Int?
+  resultNotes   String?
+  lineupHome    String?  // JSON: { starting: playerId[], bench: playerId[] }
+  lineupAway    String?  // JSON: { starting: playerId[], bench: playerId[] }
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  fromAcademy Academy @relation("FromAcademy", fields: [fromAcademyId], references: [id], onDelete: Cascade)
+  toAcademy   Academy @relation("ToAcademy",   fields: [toAcademyId],   references: [id], onDelete: Cascade)
+
+  @@map("match_requests")
+}
+
+// ── League / Tournament system ────────────────────────────────────────────────
+// type:   "INTERNAL" (teams within one academy) | "EXTERNAL" (academies vs each other)
+// status: "DRAFT" | "ACTIVE" | "COMPLETED"
+// rounds: 1 = single round-robin; 2 = home & away
+
+model League {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // "INTERNAL" | "EXTERNAL"
+  ageGroup  String?  // e.g. "U14" — required for EXTERNAL, optional for INTERNAL
+  status    String   @default("DRAFT")
+  rounds    Int      @default(1)
+  season    String?
+  academyId String
+
+  academy  Academy      @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  teams    LeagueTeam[]
+  matches  LeagueMatch[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("leagues")
+}
+
+model LeagueTeam {
+  id        String  @id @default(cuid())
+  leagueId  String
+  teamId    String? // for INTERNAL leagues — references Team
+  academyId String? // for EXTERNAL leagues — which academy this slot represents
+  teamName  String  // display name
+  logoUrl   String?
+
+  league      League        @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  team        Team?         @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  academy     Academy?      @relation(fields: [academyId], references: [id], onDelete: SetNull)
+  homeMatches LeagueMatch[] @relation("LeagueHome")
+  awayMatches LeagueMatch[] @relation("LeagueAway")
+
+  @@map("league_teams")
+}
+
+model LeagueMatch {
+  id            String    @id @default(cuid())
+  leagueId      String
+  homeTeamId    String
+  awayTeamId    String
+  round         Int       @default(1)
+  scheduledDate DateTime?
+  location      String?
+  homeScore     Int?
+  awayScore     Int?
+  status        String    @default("SCHEDULED") // "SCHEDULED" | "COMPLETED" | "CANCELLED"
+
+  league   League     @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  homeTeam LeagueTeam @relation("LeagueHome", fields: [homeTeamId], references: [id], onDelete: Cascade)
+  awayTeam LeagueTeam @relation("LeagueAway", fields: [awayTeamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("league_matches")
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+// type values: NEW_MATCH | MATCH_ACCEPTED | MATCH_REJECTED | MATCH_RESULT |
+//              NEW_TEAM  | NEW_COACH | NEW_SESSION
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String   // see above
+  title      String
+  body       String
+  link       String?  // optional deep-link (e.g. "/admin/matches")
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
