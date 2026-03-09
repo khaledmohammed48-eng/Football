@@ -29,6 +29,7 @@ interface PlayerProfileClientProps {
     attributes?: {
       speed: number; passing: number; shooting: number;
       dribbling: number; defense: number; stamina: number;
+      heading: number; overall: number; leftFoot: number; rightFoot: number;
     } | null;
     notes?: { id: string; content: string; createdAt: string; coach?: { name: string } }[];
   };
@@ -70,8 +71,11 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
   const days = daysRemaining(player.subscriptionEnd);
   const [savingBio, setSavingBio] = useState(false);
 
-  // Skills — only keep the 6 numeric skill fields (strip id/playerId/updatedAt)
-  const defaultAttrs = { speed: 5, passing: 5, shooting: 5, dribbling: 5, defense: 5, stamina: 5 };
+  // Skills — only keep the 10 numeric skill fields (strip id/playerId/updatedAt)
+  const defaultAttrs = {
+    speed: 5, passing: 5, shooting: 5, dribbling: 5, defense: 5, stamina: 5,
+    heading: 5, overall: 5, leftFoot: 5, rightFoot: 5,
+  };
   const [attrs, setAttrs] = useState<Record<string, number>>({
     ...defaultAttrs,
     ...(player.attributes
@@ -82,6 +86,10 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
           dribbling: player.attributes.dribbling,
           defense: player.attributes.defense,
           stamina: player.attributes.stamina,
+          heading: player.attributes.heading,
+          overall: player.attributes.overall,
+          leftFoot: player.attributes.leftFoot,
+          rightFoot: player.attributes.rightFoot,
         }
       : {}),
   });
@@ -117,7 +125,7 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
 
   async function saveAttrs() {
     setSavingAttrs(true);
-    // Only send the 6 skill fields — no extra fields
+    // Only send the 10 skill fields — no extra fields
     const payload = {
       speed: attrs.speed,
       passing: attrs.passing,
@@ -125,6 +133,10 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
       dribbling: attrs.dribbling,
       defense: attrs.defense,
       stamina: attrs.stamina,
+      heading: attrs.heading,
+      overall: attrs.overall,
+      leftFoot: attrs.leftFoot,
+      rightFoot: attrs.rightFoot,
     };
     const res = await fetch(`/api/players/${player.id}/attributes`, {
       method: 'PUT',

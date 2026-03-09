@@ -5,6 +5,10 @@ export const ATTRIBUTE_KEYS = [
   'dribbling',
   'defense',
   'stamina',
+  'heading',
+  'overall',
+  'leftFoot',
+  'rightFoot',
 ] as const;
 
 export type AttributeKey = (typeof ATTRIBUTE_KEYS)[number];
@@ -18,5 +22,9 @@ export interface PlayerAttributes {
   dribbling: number;
   defense: number;
   stamina: number;
+  heading: number;
+  overall: number;
+  leftFoot: number;
+  rightFoot: number;
   updatedAt: string;
 }

@@ -52,6 +52,10 @@ export const updateAttributesSchema = z.object({
   dribbling: z.number().int().min(1).max(10).optional(),
   defense: z.number().int().min(1).max(10).optional(),
   stamina: z.number().int().min(1).max(10).optional(),
+  heading: z.number().int().min(1).max(10).optional(),
+  overall: z.number().int().min(1).max(10).optional(),
+  leftFoot: z.number().int().min(1).max(10).optional(),
+  rightFoot: z.number().int().min(1).max(10).optional(),
 });
 
 export const createNoteSchema = z.object({

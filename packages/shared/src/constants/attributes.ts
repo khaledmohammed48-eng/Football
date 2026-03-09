@@ -7,6 +7,10 @@ export const ATTRIBUTE_LABELS: Record<AttributeKey, string> = {
   dribbling: 'المراوغة',
   defense: 'الدفاع',
   stamina: 'التحمل',
+  heading: 'الكرة الرأسية',
+  overall: 'التقييم العام',
+  leftFoot: 'القدم اليسرى',
+  rightFoot: 'القدم اليمنى',
 };
 
 export const ATTRIBUTE_COLORS: Record<AttributeKey, string> = {
@@ -16,4 +20,8 @@ export const ATTRIBUTE_COLORS: Record<AttributeKey, string> = {
   dribbling: '#8b5cf6',
   defense: '#22c55e',
   stamina: '#f59e0b',
+  heading: '#06b6d4',
+  overall: '#ec4899',
+  leftFoot: '#14b8a6',
+  rightFoot: '#6366f1',
 };

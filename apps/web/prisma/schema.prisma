@@ -125,6 +125,10 @@ model PlayerAttribute {
   dribbling Int      @default(5)
   defense   Int      @default(5)
   stamina   Int      @default(5)
+  heading   Int      @default(5)
+  overall   Int      @default(5)
+  leftFoot  Int      @default(5)
+  rightFoot Int      @default(5)
   updatedAt DateTime @updatedAt
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)

@@ -10,7 +10,7 @@ export default async function CoachPlayerPage({ params }: { params: { id: string
 
   const coach = await prisma.coach.findUnique({
     where: { userId: session!.user.id },
-    select: { id: true, teamId: true },
+    select: { id: true, coachTeams: { select: { teamId: true } } },
   });
 
   if (!coach) redirect('/coach/team');
@@ -29,8 +29,9 @@ export default async function CoachPlayerPage({ params }: { params: { id: string
 
   if (!player) notFound();
 
-  // Enforce that player is on coach's team
-  if (player.teamId !== coach.teamId) redirect('/coach/team');
+  // Enforce that player is on one of the coach's assigned teams
+  const coachTeamIds = coach.coachTeams.map((ct) => ct.teamId);
+  if (!player.teamId || !coachTeamIds.includes(player.teamId)) redirect('/coach/team');
 
   const serialized = {
     ...player,

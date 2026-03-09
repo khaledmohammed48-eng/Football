@@ -29,15 +29,21 @@ export async function PUT(
   const { error, status, session } = await requireAuth(['ADMIN', 'COACH']);
   if (error) return errorResponse(error, status);
 
-  // Coaches can only update players on their team
+  // Coaches can only update players on one of their assigned teams
   if (session!.user.role === 'COACH') {
-    const player = await prisma.player.findUnique({ where: { id: params.id } });
+    const player = await prisma.player.findUnique({
+      where: { id: params.id },
+      select: { teamId: true },
+    });
     const coach = await prisma.coach.findUnique({
       where: { userId: session!.user.id },
+      select: { id: true },
     });
-    if (player?.teamId !== coach?.teamId) {
-      return errorResponse('غير مصرح', 403);
-    }
+    if (!player?.teamId || !coach) return errorResponse('غير مصرح', 403);
+    const coachTeam = await prisma.coachTeam.findFirst({
+      where: { coachId: coach.id, teamId: player.teamId },
+    });
+    if (!coachTeam) return errorResponse('غير مصرح', 403);
   }
 
   const body = await request.json();
