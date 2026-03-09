@@ -226,7 +226,7 @@ export function CoachTeamClient({ teamName, teamId, coachId, coachName, players,
 
         {/* Tactical board */}
         {tab === 'tactical' && (
-          <TacticalBoard players={players} teamName={teamName} />
+          <TacticalBoard players={players} teamName={teamName} teamId={teamId} />
         )}
 
         {/* Attendance */}

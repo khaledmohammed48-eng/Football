@@ -52,6 +52,7 @@ model Team {
   trainingGroups    TrainingGroup[]
   sessionPlans      SessionPlan[]
   leagueTeams       LeagueTeam[]
+  teamLineups       TeamLineup[]
 
   @@map("teams")
 }
@@ -75,6 +76,7 @@ model Coach {
   attendanceRecords AttendanceRecord[]
   trainingGroups    TrainingGroup[]
   sessionPlans      SessionPlan[]
+  teamLineups       TeamLineup[]
 
   @@map("coaches")
 }
@@ -183,6 +185,23 @@ model TrainingGroup {
   sessionPlans SessionPlan[]
 
   @@map("training_groups")
+}
+
+model TeamLineup {
+  id        String   @id @default(cuid())
+  coachId   String
+  teamId    String
+  name      String   @default("التشكيلة الرئيسية")
+  formation String   // e.g. "11: 4-3-3"
+  slots     String   @default("{}") // JSON: { "slotIndex": "playerId" }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  coach Coach @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  team  Team  @relation(fields: [teamId],  references: [id], onDelete: Cascade)
+
+  @@unique([coachId, teamId, name])
+  @@map("team_lineups")
 }
 
 model SessionPlan {
