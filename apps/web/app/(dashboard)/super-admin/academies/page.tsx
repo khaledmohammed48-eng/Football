@@ -9,15 +9,16 @@ export default async function AcademiesListPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">إدارة الأكاديميات</h1>
-        <Link href="/super-admin/academies/new" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">إدارة الأكاديميات</h1>
+        <Link href="/super-admin/academies/new" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition min-h-[44px] flex items-center">
           + أكاديمية جديدة
         </Link>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-right">
+        <div className="overflow-x-auto">
+        <table className="w-full text-right min-w-[600px]">
           <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
             <tr>
               <th className="px-4 py-3">الأكاديمية</th>
@@ -65,6 +66,7 @@ export default async function AcademiesListPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

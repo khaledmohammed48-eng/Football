@@ -233,7 +233,8 @@ export default function LeagueDetailPage() {
           {league.standings.length === 0 ? (
             <div className="text-center py-12 text-gray-400">لا توجد نتائج بعد</div>
           ) : (
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[500px]">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-xs">
                   <th className="text-right px-4 py-3 w-8">#</th>
@@ -269,6 +270,7 @@ export default function LeagueDetailPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
           <div className="px-4 py-2 bg-gray-50 text-xs text-gray-400 border-t border-gray-100">
             ل=لعب · ف=فوز · ت=تعادل · خ=خسارة · أف=أهداف له · أع=أهداف عليه · فا=فارق الأهداف · ن=نقاط
@@ -290,22 +292,22 @@ export default function LeagueDetailPage() {
               </div>
               <div className="divide-y divide-gray-50">
                 {league.matches.filter(m => m.round === round).map(m => (
-                  <div key={m.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition">
-                    <div className="flex-1 text-right font-semibold text-gray-800">{m.homeTeam.teamName}</div>
-                    <div className="mx-4 flex items-center gap-2">
+                  <div key={m.id} className="flex items-center justify-between px-3 sm:px-5 py-3 hover:bg-gray-50 transition gap-1">
+                    <div className="flex-1 min-w-0 text-right font-semibold text-gray-800 text-sm truncate">{m.homeTeam.teamName}</div>
+                    <div className="mx-2 sm:mx-4 flex items-center gap-1 flex-shrink-0">
                       {m.status === 'COMPLETED' ? (
-                        <span className="font-bold text-lg text-gray-900">{m.homeScore} - {m.awayScore}</span>
+                        <span className="font-bold text-base text-gray-900 whitespace-nowrap">{m.homeScore} - {m.awayScore}</span>
                       ) : (
-                        <span className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
+                        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
                           {m.scheduledDate ? new Date(m.scheduledDate).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' }) : 'غير محدد'}
                         </span>
                       )}
                     </div>
-                    <div className="flex-1 text-right font-semibold text-gray-800">{m.awayTeam.teamName}</div>
+                    <div className="flex-1 min-w-0 text-right font-semibold text-gray-800 text-sm truncate">{m.awayTeam.teamName}</div>
                     {league.status !== 'COMPLETED' && (
                       <button
                         onClick={() => openEdit(m)}
-                        className="mr-4 text-xs text-green-600 hover:text-green-800 font-medium"
+                        className="mr-2 sm:mr-4 text-xs text-green-600 hover:text-green-800 font-medium flex-shrink-0 min-h-[36px] px-1"
                       >
                         تعديل
                       </button>

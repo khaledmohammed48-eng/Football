@@ -377,7 +377,8 @@ export default function PlayersPage() {
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[700px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-right text-xs font-medium text-gray-500 px-4 py-3">اللاعب</th>
@@ -440,6 +441,7 @@ export default function PlayersPage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

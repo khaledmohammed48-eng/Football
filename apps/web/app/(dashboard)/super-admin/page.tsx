@@ -13,15 +13,15 @@ export default async function SuperAdminDashboard() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">لوحة التحكم — المدير العام</h1>
-        <Link href="/super-admin/academies/new" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">لوحة التحكم — المدير العام</h1>
+        <Link href="/super-admin/academies/new" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition min-h-[44px] flex items-center">
           + إضافة أكاديمية
         </Link>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
         {[
           { label: 'الأكاديميات', value: academies.length, icon: '🏟️', color: 'bg-blue-50 border-blue-200' },
           { label: 'اللاعبون (الكل)', value: totalPlayers, icon: '⚽', color: 'bg-green-50 border-green-200' },

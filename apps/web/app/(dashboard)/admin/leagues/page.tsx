@@ -46,14 +46,14 @@ export default function LeaguesPage() {
 
   return (
     <div className="max-w-5xl mx-auto" dir="rtl">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">الدوريات والبطولات</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">الدوريات والبطولات</h1>
           <p className="text-gray-500 text-sm mt-1">إدارة الدوريات الداخلية والخارجية</p>
         </div>
         <Link
           href="/admin/leagues/new"
-          className="bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2"
+          className="bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2 min-h-[44px]"
         >
           <span>+</span>
           <span>إنشاء دوري</span>
@@ -80,15 +80,15 @@ export default function LeaguesPage() {
             <Link
               key={league.id}
               href={`/admin/leagues/${league.id}`}
-              className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition flex items-center justify-between gap-4"
+              className="bg-white rounded-2xl border border-gray-100 p-4 md:p-5 hover:shadow-md transition flex items-center justify-between gap-3"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-2xl flex-shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-xl md:text-2xl flex-shrink-0">
                   🏅
                 </div>
-                <div>
-                  <div className="font-bold text-gray-900 text-lg">{league.name}</div>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <div className="min-w-0">
+                  <div className="font-bold text-gray-900 text-base md:text-lg truncate">{league.name}</div>
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
                       {TYPE_LABELS[league.type] ?? league.type}
                     </span>
@@ -103,17 +103,17 @@ export default function LeaguesPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-6 text-center">
+              <div className="flex items-center gap-3 md:gap-6 text-center flex-shrink-0">
                 <div>
-                  <div className="text-xl font-bold text-gray-800">{league.teams.length}</div>
+                  <div className="text-base md:text-xl font-bold text-gray-800">{league.teams.length}</div>
                   <div className="text-xs text-gray-400">فريق</div>
                 </div>
-                <div>
-                  <div className="text-xl font-bold text-gray-800">{completedMatches(league)}/{league.matches.length}</div>
+                <div className="hidden sm:block">
+                  <div className="text-base md:text-xl font-bold text-gray-800">{completedMatches(league)}/{league.matches.length}</div>
                   <div className="text-xs text-gray-400">مباريات</div>
                 </div>
                 <div>
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_COLORS[league.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${STATUS_COLORS[league.status] ?? 'bg-gray-100 text-gray-600'}`}>
                     {STATUS_LABELS[league.status] ?? league.status}
                   </span>
                 </div>

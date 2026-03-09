@@ -2,8 +2,7 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Sidebar } from '@/components/layout/sidebar';
-import { NotificationBell } from '@/components/layout/notification-bell';
+import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { AuthSessionProvider } from '@/components/providers/session-provider';
 import { InactivePlayerBanner } from '@/components/player/inactive-player-banner';
 
@@ -99,25 +98,16 @@ export default async function DashboardLayout({
 
   return (
     <AuthSessionProvider>
-      <div className="flex min-h-screen bg-gray-50">
-        <Sidebar
-          role={session.user.role}
-          userEmail={session.user.email}
-          displayName={session.user.name ?? session.user.email}
-          academyName={academyName}
-          academyLogoUrl={academyLogoUrl}
-          photoUrl={sidebarPhotoUrl}
-        />
-        <div className="flex-1 mr-64 flex flex-col min-w-0">
-          {/* Top bar with notification bell */}
-          <header className="sticky top-0 z-30 bg-white border-b border-gray-100 px-8 py-2.5 flex items-center justify-end">
-            <NotificationBell />
-          </header>
-          <main className="flex-1 p-8 overflow-auto">
-            {children}
-          </main>
-        </div>
-      </div>
+      <DashboardShell
+        role={session.user.role}
+        userEmail={session.user.email}
+        displayName={session.user.name ?? session.user.email}
+        academyName={academyName}
+        academyLogoUrl={academyLogoUrl}
+        photoUrl={sidebarPhotoUrl}
+      >
+        {children}
+      </DashboardShell>
       {/* Inactive / expired subscription modal — shown on every page load for affected players */}
       {playerStatus && (
         <InactivePlayerBanner
