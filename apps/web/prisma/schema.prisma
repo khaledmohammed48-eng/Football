@@ -46,6 +46,7 @@ model Team {
 
   academy           Academy?           @relation(fields: [academyId], references: [id], onDelete: SetNull)
   coaches           Coach[]
+  coachTeams        CoachTeam[]
   players           Player[]
   attendanceRecords AttendanceRecord[]
   trainingGroups    TrainingGroup[]
@@ -61,7 +62,7 @@ model Coach {
   name      String
   photoUrl  String?
   phone     String?
-  teamId    String?
+  teamId    String?  // primary/first team — kept for backward compat with attendance/sessions
   academyId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -69,12 +70,24 @@ model Coach {
   academy           Academy?           @relation(fields: [academyId], references: [id], onDelete: SetNull)
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   team              Team?              @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  coachTeams        CoachTeam[]        // all assigned teams (many-to-many)
   notes             CoachNote[]
   attendanceRecords AttendanceRecord[]
   trainingGroups    TrainingGroup[]
   sessionPlans      SessionPlan[]
 
   @@map("coaches")
+}
+
+model CoachTeam {
+  coachId String
+  teamId  String
+
+  coach Coach @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  team  Team  @relation(fields: [teamId],  references: [id], onDelete: Cascade)
+
+  @@id([coachId, teamId])
+  @@map("coach_teams")
 }
 
 model Player {

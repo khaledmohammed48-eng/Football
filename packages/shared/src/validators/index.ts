@@ -41,6 +41,7 @@ export const updateCoachSchema = z.object({
   name: z.string().min(2).optional(),
   phone: z.string().optional().nullable(),
   teamId: z.string().optional().nullable(),
+  teamIds: z.array(z.string()).optional(), // multi-team assignment
   photoUrl: z.string().optional().nullable(),
 });
 

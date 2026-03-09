@@ -17,6 +17,7 @@ export default async function CoachDetailPage({ params }: { params: { id: string
             },
           },
         },
+        coachTeams: { include: { team: { select: { id: true, name: true } } } },
         user: { select: { email: true } },
         sessionPlans: { orderBy: { date: 'desc' }, take: 30 },
         notes: {
@@ -111,14 +112,16 @@ export default async function CoachDetailPage({ params }: { params: { id: string
               <h2 className="text-lg font-bold text-gray-900">{coach.name}</h2>
               <p className="text-sm text-gray-500">{coach.user.email}</p>
               <p className="text-sm text-gray-500 mt-0.5">
-                {coach.team?.name ?? 'بدون فريق'}
+                {coach.coachTeams.length > 0
+                  ? coach.coachTeams.map((ct) => ct.team.name).join(' · ')
+                  : 'بدون فريق'}
               </p>
             </div>
           </div>
         </div>
 
         {/* Edit Form */}
-        <CoachEditForm coach={serialized} teams={teams} />
+        <CoachEditForm coach={{ ...serialized, teamIds: coach.coachTeams.map((ct) => ct.teamId) }} teams={teams} />
       </div>
 
       {/* Full-width coach detail tabs */}

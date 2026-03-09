@@ -8,7 +8,7 @@ interface CoachEditFormProps {
     id: string;
     name: string;
     phone?: string | null;
-    teamId?: string | null;
+    teamIds?: string[];
     photoUrl?: string | null;
   };
   teams: { id: string; name: string }[];
@@ -19,12 +19,21 @@ export function CoachEditForm({ coach, teams }: CoachEditFormProps) {
   const [form, setForm] = useState({
     name: coach.name,
     phone: coach.phone ?? '',
-    teamId: coach.teamId ?? '',
+    teamIds: coach.teamIds ?? [],
     photoUrl: coach.photoUrl ?? '',
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  function toggleTeam(id: string) {
+    setForm((f) => ({
+      ...f,
+      teamIds: f.teamIds.includes(id)
+        ? f.teamIds.filter((t) => t !== id)
+        : [...f.teamIds, id],
+    }));
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -32,7 +41,12 @@ export function CoachEditForm({ coach, teams }: CoachEditFormProps) {
     await fetch(`/api/coaches/${coach.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, teamId: form.teamId || null }),
+      body: JSON.stringify({
+        name: form.name,
+        phone: form.phone || null,
+        photoUrl: form.photoUrl || null,
+        teamIds: form.teamIds,
+      }),
     });
     setSaving(false);
     setSaved(true);
@@ -48,8 +62,8 @@ export function CoachEditForm({ coach, teams }: CoachEditFormProps) {
     fd.append('file', file);
     const res = await fetch('/api/upload', { method: 'POST', body: fd });
     if (res.ok) {
-      const { url } = await res.json();
-      setForm({ ...form, photoUrl: url });
+      const data = await res.json();
+      setForm({ ...form, photoUrl: data.url });
     }
     setUploading(false);
   }
@@ -75,17 +89,39 @@ export function CoachEditForm({ coach, teams }: CoachEditFormProps) {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
+
+        {/* Multi-team checkboxes */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">الفريق</label>
-          <select
-            value={form.teamId}
-            onChange={(e) => setForm({ ...form, teamId: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            <option value="">بدون فريق</option>
-            {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            الفرق المُسندة
+            {form.teamIds.length > 0 && (
+              <span className="mr-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                {form.teamIds.length} {form.teamIds.length === 1 ? 'فريق' : 'فرق'}
+              </span>
+            )}
+          </label>
+          <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-48 overflow-y-auto">
+            {teams.length === 0 ? (
+              <p className="text-sm text-gray-400 px-3 py-3 text-center">لا توجد فرق</p>
+            ) : (
+              teams.map((t) => (
+                <label key={t.id} className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    checked={form.teamIds.includes(t.id)}
+                    onChange={() => toggleTeam(t.id)}
+                    className="w-4 h-4 accent-green-600 flex-shrink-0"
+                  />
+                  <span className="text-sm text-gray-700">{t.name}</span>
+                </label>
+              ))
+            )}
+          </div>
+          {form.teamIds.length === 0 && (
+            <p className="text-xs text-gray-400 mt-1">لم يتم تعيين أي فريق</p>
+          )}
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">الصورة</label>
           <label className="cursor-pointer inline-block bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm hover:bg-gray-100 transition">
@@ -96,6 +132,7 @@ export function CoachEditForm({ coach, teams }: CoachEditFormProps) {
             <img src={form.photoUrl} alt="preview" className="mt-2 w-12 h-12 rounded-full object-cover" />
           )}
         </div>
+
         <button
           type="submit"
           disabled={saving}

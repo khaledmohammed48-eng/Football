@@ -2,25 +2,31 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CoachTeamClient } from './team-client';
+import { CoachTeamSelector } from './team-selector';
 
-export default async function CoachTeamPage() {
+export default async function CoachTeamPage({
+  searchParams,
+}: {
+  searchParams: { teamId?: string };
+}) {
   const session = await getServerSession(authOptions);
 
   const coach = await prisma.coach.findUnique({
     where: { userId: session!.user.id },
     include: {
-      team: {
+      coachTeams: {
         include: {
-          players: {
-            include: { attributes: true },
-            orderBy: { name: 'asc' },
+          team: {
+            include: {
+              players: { include: { attributes: true }, orderBy: { name: 'asc' } },
+            },
           },
         },
       },
     },
   });
 
-  if (!coach?.team) {
+  if (!coach || coach.coachTeams.length === 0) {
     return (
       <div className="text-center py-20">
         <div className="text-4xl mb-4">🏆</div>
@@ -30,15 +36,21 @@ export default async function CoachTeamPage() {
     );
   }
 
-  const team = coach.team;
+  // Determine active team (from query param or first team)
+  const allTeams = coach.coachTeams.map((ct) => ({ id: ct.team.id, name: ct.team.name }));
+  const selectedTeamId =
+    searchParams.teamId && allTeams.find((t) => t.id === searchParams.teamId)
+      ? searchParams.teamId
+      : allTeams[0].id;
 
-  // Fetch training groups for this coach
+  const activeCoachTeam = coach.coachTeams.find((ct) => ct.teamId === selectedTeamId)!;
+  const team = activeCoachTeam.team;
+
   const rawGroups = await prisma.trainingGroup.findMany({
-    where: { coachId: coach.id },
+    where: { coachId: coach.id, teamId: team.id },
     orderBy: { createdAt: 'desc' },
   });
 
-  // Serialize dates
   const players = team.players.map((p) => ({
     id: p.id,
     name: p.name,
@@ -70,13 +82,18 @@ export default async function CoachTeamPage() {
   }));
 
   return (
-    <CoachTeamClient
-      teamName={team.name}
-      teamId={team.id}
-      coachId={coach.id}
-      coachName={coach.name}
-      players={players}
-      groups={groups}
-    />
+    <div>
+      {allTeams.length > 1 && (
+        <CoachTeamSelector teams={allTeams} selectedTeamId={selectedTeamId} />
+      )}
+      <CoachTeamClient
+        teamName={team.name}
+        teamId={team.id}
+        coachId={coach.id}
+        coachName={coach.name}
+        players={players}
+        groups={groups}
+      />
+    </div>
   );
 }

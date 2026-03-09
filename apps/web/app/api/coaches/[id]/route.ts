@@ -13,6 +13,7 @@ export async function GET(
     where: { id: params.id },
     include: {
       team: { select: { id: true, name: true } },
+      coachTeams: { include: { team: { select: { id: true, name: true } } } },
       user: { select: { email: true } },
     },
   });
@@ -22,6 +23,8 @@ export async function GET(
 
   return successResponse({
     ...coach,
+    teamIds: coach.coachTeams.map((ct) => ct.teamId),
+    teams: coach.coachTeams.map((ct) => ct.team),
     createdAt: coach.createdAt.toISOString(),
     updatedAt: coach.updatedAt.toISOString(),
   });
@@ -44,14 +47,33 @@ export async function PUT(
   if (!existing) return errorResponse('المدرب غير موجود', 404);
   if (existing.academyId !== session!.user.academyId) return errorResponse('غير مصرح', 403);
 
+  const { teamIds, ...coreData } = parsed.data;
+
+  // If teamIds provided — sync the CoachTeam join table
+  if (teamIds !== undefined) {
+    await prisma.coachTeam.deleteMany({ where: { coachId: params.id } });
+    if (teamIds.length > 0) {
+      await prisma.coachTeam.createMany({
+        data: teamIds.map((tid) => ({ coachId: params.id, teamId: tid })),
+      });
+    }
+    // Keep teamId in sync with first team (for backward compat)
+    coreData.teamId = teamIds[0] ?? null;
+  }
+
   const coach = await prisma.coach.update({
     where: { id: params.id },
-    data: parsed.data,
-    include: { team: { select: { id: true, name: true } } },
+    data: coreData,
+    include: {
+      team: { select: { id: true, name: true } },
+      coachTeams: { include: { team: { select: { id: true, name: true } } } },
+    },
   });
 
   return successResponse({
     ...coach,
+    teamIds: coach.coachTeams.map((ct) => ct.teamId),
+    teams: coach.coachTeams.map((ct) => ct.team),
     createdAt: coach.createdAt.toISOString(),
     updatedAt: coach.updatedAt.toISOString(),
   });
