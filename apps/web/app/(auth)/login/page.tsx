@@ -11,19 +11,14 @@ export default function LoginPage() {
   const [error, setError]           = useState('');
   const [loading, setLoading]       = useState(false);
 
-  // Academy branding loaded from public API
-  const [academyName, setAcademyName]   = useState('أكاديمتنا');
-  const [academyLogo, setAcademyLogo]   = useState<string | null>(null);
-  const [logoError, setLogoError]       = useState(false);
+  // Academy name loaded from public API
+  const [academyName, setAcademyName] = useState('أكاديمتنا');
 
   useEffect(() => {
     fetch('/api/public/academy')
       .then((r) => r.json())
-      .then((d) => {
-        if (d.name)    setAcademyName(d.name);
-        if (d.logoUrl) setAcademyLogo(d.logoUrl);
-      })
-      .catch(() => {/* keep defaults */});
+      .then((d) => { if (d.name) setAcademyName(d.name); })
+      .catch(() => {});
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -47,38 +42,13 @@ export default function LoginPage() {
     }
   }
 
-  // Logo element — shows academy logo if loaded, else fallback svg
-  function LogoImg({ size }: { size: number }) {
-    if (academyLogo && !logoError) {
-      return (
-        <img
-          src={academyLogo}
-          alt={academyName}
-          width={size}
-          height={size}
-          className="rounded-xl object-cover shadow-md"
-          onError={() => setLogoError(true)}
-        />
-      );
-    }
-    return (
-      <img
-        src="/logo.svg"
-        alt={academyName}
-        width={size}
-        height={size}
-        className="object-contain drop-shadow-lg"
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800" dir="rtl">
 
       {/* Left panel — branding / invite */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-14 text-white">
         <div className="flex items-center gap-4">
-          <LogoImg size={64} />
+          <img src="/logo.svg" alt={academyName} width={64} height={64} className="object-contain drop-shadow-lg" />
           <div>
             <div className="text-2xl font-bold tracking-tight">{academyName}</div>
             <div className="text-green-300 text-sm mt-0.5">إدارة ذكية لأكاديميات كرة القدم</div>
@@ -123,7 +93,7 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="flex flex-col items-center mb-8 lg:hidden">
-            <LogoImg size={80} />
+            <img src="/logo.svg" alt={academyName} width={80} height={80} className="object-contain drop-shadow-lg" />
             <h1 className="text-xl font-bold text-gray-900 mt-3">{academyName}</h1>
             <p className="text-gray-400 text-sm mt-0.5">إدارة كرة القدم</p>
           </div>
