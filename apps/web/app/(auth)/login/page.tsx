@@ -37,7 +37,7 @@ export default function LoginPage() {
       {/* Left panel — branding / invite */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-14 text-white">
         <div className="flex items-center gap-4">
-          <img src="/icons/icon-192x192.png" alt="الشعار" width={64} height={64} className="object-contain drop-shadow-lg rounded-xl" />
+          <img src="/logo.svg" alt="الشعار" width={64} height={64} className="object-contain drop-shadow-lg" />
           <div>
             <div className="text-2xl font-bold tracking-tight">أكاديمتنا</div>
             <div className="text-green-300 text-sm mt-0.5">إدارة ذكية لأكاديميات كرة القدم</div>
@@ -81,7 +81,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex flex-col items-center mb-8 lg:hidden">
-            <img src="/icons/icon-192x192.png" alt="الشعار" width={80} height={80} className="object-contain mb-3 rounded-2xl shadow-md" />
+            <img src="/logo.svg" alt="الشعار" width={80} height={80} className="object-contain mb-3" />
             <h1 className="text-xl font-bold text-gray-900">أكاديمتنا</h1>
             <p className="text-gray-400 text-sm mt-0.5">إدارة كرة القدم</p>
           </div>
