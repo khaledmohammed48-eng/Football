@@ -15,7 +15,8 @@ export interface FifaCardData {
     dribbling: number;
     defense: number;
     stamina: number;
-    overall?: number;
+    overall?: number | null;
+    [key: string]: unknown; // allow extra DB fields
   } | null;
   academyName: string;
   academyLogoUrl?: string | null;

@@ -76,18 +76,16 @@ export default async function PlayerProfilePage() {
       <BannersCarousel />
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-gray-900">ملفي الشخصي</h1>
-        {player.attributes && (
-          <FifaCardModal
-            data={{
-              playerName: player.name,
-              photoUrl: player.photoUrl,
-              position: player.position,
-              attributes: player.attributes,
-              academyName: academy?.name ?? 'الأكاديمية',
-              academyLogoUrl: academy?.logoUrl,
-            }}
-          />
-        )}
+        <FifaCardModal
+          data={{
+            playerName: player.name,
+            photoUrl: player.photoUrl,
+            position: player.position,
+            attributes: player.attributes,
+            academyName: academy?.name ?? 'الأكاديمية',
+            academyLogoUrl: academy?.logoUrl,
+          }}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

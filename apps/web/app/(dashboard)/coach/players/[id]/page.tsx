@@ -65,18 +65,16 @@ export default async function CoachPlayerPage({ params }: { params: { id: string
           <span className="text-gray-300">/</span>
           <h1 className="text-2xl font-bold text-gray-900">{player.name}</h1>
         </div>
-        {player.attributes && (
-          <FifaCardModal
-            data={{
-              playerName: player.name,
-              photoUrl: player.photoUrl,
-              position: player.position,
-              attributes: player.attributes,
-              academyName: academy?.name ?? 'الأكاديمية',
-              academyLogoUrl: academy?.logoUrl,
-            }}
-          />
-        )}
+        <FifaCardModal
+          data={{
+            playerName: player.name,
+            photoUrl: player.photoUrl,
+            position: player.position,
+            attributes: player.attributes,
+            academyName: academy?.name ?? 'الأكاديمية',
+            academyLogoUrl: academy?.logoUrl,
+          }}
+        />
       </div>
       <PlayerProfileClient
         player={serialized}
