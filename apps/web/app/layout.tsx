@@ -12,6 +12,9 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? 'https://web-production-2835e.up.railway.app'
+  ),
   title: 'أكاديمتنا',
   description: 'إدارة الأكاديمية — اللاعبون والمدربون والفرق',
   manifest: '/manifest.json',
@@ -29,6 +32,26 @@ export const metadata: Metadata = {
     apple: [
       { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
+  },
+  openGraph: {
+    title: 'أكاديمتنا',
+    description: 'إدارة الأكاديمية — اللاعبون والمدربون والفرق',
+    type: 'website',
+    locale: 'ar_SA',
+    images: [
+      {
+        url: '/icons/icon-512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'أكاديمتنا',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'أكاديمتنا',
+    description: 'إدارة الأكاديمية — اللاعبون والمدربون والفرق',
+    images: ['/icons/icon-512x512.png'],
   },
   viewport: {
     width: 'device-width',
