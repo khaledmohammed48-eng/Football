@@ -1,15 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
   const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [password, setPassword]     = useState('');
+  const [error, setError]           = useState('');
+  const [loading, setLoading]       = useState(false);
+
+  // Academy branding loaded from public API
+  const [academyName, setAcademyName]   = useState('أكاديمتنا');
+  const [academyLogo, setAcademyLogo]   = useState<string | null>(null);
+  const [logoError, setLogoError]       = useState(false);
+
+  useEffect(() => {
+    fetch('/api/public/academy')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.name)    setAcademyName(d.name);
+        if (d.logoUrl) setAcademyLogo(d.logoUrl);
+      })
+      .catch(() => {/* keep defaults */});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,14 +47,40 @@ export default function LoginPage() {
     }
   }
 
+  // Logo element — shows academy logo if loaded, else fallback svg
+  function LogoImg({ size }: { size: number }) {
+    if (academyLogo && !logoError) {
+      return (
+        <img
+          src={academyLogo}
+          alt={academyName}
+          width={size}
+          height={size}
+          className="rounded-xl object-cover shadow-md"
+          onError={() => setLogoError(true)}
+        />
+      );
+    }
+    return (
+      <img
+        src="/logo.svg"
+        alt={academyName}
+        width={size}
+        height={size}
+        className="object-contain drop-shadow-lg"
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800" dir="rtl">
+
       {/* Left panel — branding / invite */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-14 text-white">
         <div className="flex items-center gap-4">
-          <img src="/logo.svg" alt="الشعار" width={64} height={64} className="object-contain drop-shadow-lg" />
+          <LogoImg size={64} />
           <div>
-            <div className="text-2xl font-bold tracking-tight">أكاديمتنا</div>
+            <div className="text-2xl font-bold tracking-tight">{academyName}</div>
             <div className="text-green-300 text-sm mt-0.5">إدارة ذكية لأكاديميات كرة القدم</div>
           </div>
         </div>
@@ -79,10 +120,11 @@ export default function LoginPage() {
       {/* Right panel — login form */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md">
+
           {/* Mobile logo */}
           <div className="flex flex-col items-center mb-8 lg:hidden">
-            <img src="/logo.svg" alt="الشعار" width={80} height={80} className="object-contain mb-3" />
-            <h1 className="text-xl font-bold text-gray-900">أكاديمتنا</h1>
+            <LogoImg size={80} />
+            <h1 className="text-xl font-bold text-gray-900 mt-3">{academyName}</h1>
             <p className="text-gray-400 text-sm mt-0.5">إدارة كرة القدم</p>
           </div>
 
