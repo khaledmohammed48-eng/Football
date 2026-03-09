@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 interface NavItem {
@@ -103,6 +104,8 @@ export function Sidebar({
   onClose,
 }: SidebarProps) {
   const pathname = usePathname();
+  const [logoError, setLogoError] = useState(false);
+  const [userPhotoError, setUserPhotoError] = useState(false);
 
   const navGroups =
     role === 'SUPER_ADMIN' ? superAdminNavGroups :
@@ -158,8 +161,13 @@ export function Sidebar({
           {/* Academy row */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-gray-800">
-              {academyLogoUrl ? (
-                <img src={academyLogoUrl} alt="شعار" className="w-10 h-10 object-cover" />
+              {academyLogoUrl && !logoError ? (
+                <img
+                  src={academyLogoUrl}
+                  alt="شعار"
+                  className="w-10 h-10 object-cover"
+                  onError={() => setLogoError(true)}
+                />
               ) : (
                 <Image src="/logo.svg" alt="شعار" width={40} height={40} className="object-contain" />
               )}
@@ -180,8 +188,8 @@ export function Sidebar({
               >
                 {/* Avatar */}
                 <div className="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-green-600/40">
-                  {photoUrl ? (
-                    <img src={photoUrl} alt="الملف" className="w-10 h-10 object-cover rounded-full" />
+                  {photoUrl && !userPhotoError ? (
+                    <img src={photoUrl} alt="الملف" className="w-10 h-10 object-cover rounded-full" onError={() => setUserPhotoError(true)} />
                   ) : (
                     <span className="text-sm font-bold text-white">{avatarInitial}</span>
                   )}
@@ -205,8 +213,8 @@ export function Sidebar({
             ) : (
               <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-800/60">
                 <div className="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-green-600/40">
-                  {photoUrl ? (
-                    <img src={photoUrl} alt="الملف" className="w-10 h-10 object-cover rounded-full" />
+                  {photoUrl && !userPhotoError ? (
+                    <img src={photoUrl} alt="الملف" className="w-10 h-10 object-cover rounded-full" onError={() => setUserPhotoError(true)} />
                   ) : (
                     <span className="text-sm font-bold text-white">{avatarInitial}</span>
                   )}

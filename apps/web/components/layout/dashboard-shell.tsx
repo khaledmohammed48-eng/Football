@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Sidebar } from './sidebar';
 import { NotificationBell } from './notification-bell';
 
@@ -24,6 +24,7 @@ export function DashboardShell({
   photoUrl,
 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [logoImgError, setLogoImgError] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -55,11 +56,12 @@ export function DashboardShell({
 
           {/* Academy name + logo — mobile center */}
           <div className="lg:hidden flex-1 flex items-center gap-2 min-w-0 overflow-hidden">
-            {academyLogoUrl && (
+            {academyLogoUrl && !logoImgError && (
               <img
                 src={academyLogoUrl}
                 alt=""
                 className="w-6 h-6 rounded-md object-cover flex-shrink-0"
+                onError={() => setLogoImgError(true)}
               />
             )}
             {academyName && (

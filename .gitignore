@@ -30,9 +30,8 @@ yarn-error.log*
 apps/web/prisma/*.db
 apps/web/prisma/*.db-journal
 
-# Uploads
-apps/web/public/uploads/*
-!apps/web/public/uploads/.gitkeep
+# Uploads — committed to git so they survive Railway deploys
+# (new uploads go to /data/uploads via API, not here)
 
 # Docker SSL certs
 docker/nginx/ssl/
