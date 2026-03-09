@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Cairo } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 
 export const dynamic = 'force-dynamic';
@@ -11,8 +12,30 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: 'أكاديمتنا | My Academy',
+  title: 'أكاديمتنا',
   description: 'إدارة الأكاديمية — اللاعبون والمدربون والفرق',
+  manifest: '/manifest.json',
+  themeColor: '#16a34a',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'أكاديمتنا',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
@@ -24,6 +47,13 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" className={cairo.variable}>
       <body className="min-h-screen bg-background font-cairo antialiased">
         {children}
+        <Script id="register-sw" strategy="afterInteractive">{`
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+              navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+          }
+        `}</Script>
       </body>
     </html>
   );
