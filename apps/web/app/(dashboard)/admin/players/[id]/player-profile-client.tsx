@@ -71,10 +71,10 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
   const days = daysRemaining(player.subscriptionEnd);
   const [savingBio, setSavingBio] = useState(false);
 
-  // Skills — only keep the 10 numeric skill fields (strip id/playerId/updatedAt)
+  // Skills — 9 manual sliders; overall is auto-calculated from their average
   const defaultAttrs = {
     speed: 5, passing: 5, shooting: 5, dribbling: 5, defense: 5, stamina: 5,
-    heading: 5, overall: 5, leftFoot: 5, rightFoot: 5,
+    heading: 5, leftFoot: 5, rightFoot: 5,
   };
   const [attrs, setAttrs] = useState<Record<string, number>>({
     ...defaultAttrs,
@@ -87,7 +87,6 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
           defense: player.attributes.defense,
           stamina: player.attributes.stamina,
           heading: player.attributes.heading,
-          overall: player.attributes.overall,
           leftFoot: player.attributes.leftFoot,
           rightFoot: player.attributes.rightFoot,
         }
@@ -125,7 +124,10 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
 
   async function saveAttrs() {
     setSavingAttrs(true);
-    // Only send the 10 skill fields — no extra fields
+    // Calculate overall as rounded average of the 9 skill sliders
+    const calculatedOverall = Math.round(
+      ATTRIBUTE_KEYS.reduce((sum, k) => sum + attrs[k], 0) / ATTRIBUTE_KEYS.length
+    );
     const payload = {
       speed: attrs.speed,
       passing: attrs.passing,
@@ -134,9 +136,9 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
       defense: attrs.defense,
       stamina: attrs.stamina,
       heading: attrs.heading,
-      overall: attrs.overall,
       leftFoot: attrs.leftFoot,
       rightFoot: attrs.rightFoot,
+      overall: calculatedOverall,
     };
     const res = await fetch(`/api/players/${player.id}/attributes`, {
       method: 'PUT',
@@ -408,10 +410,40 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
         {/* Skills Tab */}
         {tab === 'skills' && (
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="space-y-5">
+            {/* Overall rating banner — auto-calculated */}
+            {(() => {
+              const overall = Math.round(
+                ATTRIBUTE_KEYS.reduce((sum, k) => sum + attrs[k], 0) / ATTRIBUTE_KEYS.length
+              );
+              const color = overall >= 8 ? '#22c55e' : overall >= 5 ? '#f59e0b' : '#ef4444';
+              return (
+                <div className="flex items-center gap-4 mb-6 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0"
+                    style={{ background: `conic-gradient(${color} ${overall * 36}deg, #e5e7eb 0deg)` }}
+                  >
+                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-gray-900 text-xl font-bold">
+                      {overall}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-gray-700">التقييم العام</div>
+                    <div className="text-xs text-gray-400">يُحسب تلقائياً من المهارات — من 10</div>
+                    <div className="flex gap-1 mt-1">
+                      {[1,2,3,4,5,6,7,8,9,10].map((v) => (
+                        <div key={v} className="w-5 h-2 rounded-sm" style={{ backgroundColor: v <= overall ? color : '#e5e7eb' }} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 2-column sliders grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
               {ATTRIBUTE_KEYS.map((key) => (
                 <div key={key}>
-                  <div className="flex justify-between mb-2">
+                  <div className="flex justify-between mb-1.5">
                     <label className="text-sm font-medium text-gray-700">{ATTRIBUTE_LABELS[key]}</label>
                     <span className="text-sm font-bold" style={{ color: ATTRIBUTE_COLORS[key] }}>
                       {attrs[key]}/10
@@ -427,20 +459,14 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
                     className="w-full h-2 rounded-lg appearance-none cursor-pointer"
                     style={{ accentColor: ATTRIBUTE_COLORS[key] }}
                   />
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>1</span>
-                    <div className="flex gap-1">
-                      {[1,2,3,4,5,6,7,8,9,10].map((v) => (
-                        <div
-                          key={v}
-                          className="w-4 h-1.5 rounded-sm"
-                          style={{
-                            backgroundColor: v <= attrs[key] ? ATTRIBUTE_COLORS[key] : '#e5e7eb',
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <span>10</span>
+                  <div className="flex gap-0.5 mt-1">
+                    {[1,2,3,4,5,6,7,8,9,10].map((v) => (
+                      <div
+                        key={v}
+                        className="flex-1 h-1.5 rounded-sm"
+                        style={{ backgroundColor: v <= attrs[key] ? ATTRIBUTE_COLORS[key] : '#e5e7eb' }}
+                      />
+                    ))}
                   </div>
                 </div>
               ))}

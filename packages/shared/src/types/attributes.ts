@@ -6,7 +6,6 @@ export const ATTRIBUTE_KEYS = [
   'defense',
   'stamina',
   'heading',
-  'overall',
   'leftFoot',
   'rightFoot',
 ] as const;
