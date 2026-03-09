@@ -31,7 +31,7 @@ interface PlayerProfileClientProps {
       dribbling: number; defense: number; stamina: number;
       heading: number; overall: number; leftFoot: number; rightFoot: number;
     } | null;
-    notes?: { id: string; content: string; createdAt: string; coach?: { name: string } }[];
+    notes?: { id: string; content: string; createdAt: string; coach?: { name: string; photoUrl?: string | null } }[];
   };
   teams: Team[];
   isAdmin?: boolean;
@@ -513,29 +513,49 @@ export function PlayerProfileClient({ player, teams, isAdmin, coachId }: PlayerP
               </div>
             ) : (
               <div className="space-y-3">
-                {notes.map((note) => (
-                  <div key={note.id} className="bg-white rounded-xl border border-gray-200 p-4">
-                    <div className="flex justify-between mb-2">
-                      <div className="text-sm font-medium text-gray-900">
-                        {note.coach?.name ?? 'مدرب'}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400">
-                          {new Date(note.createdAt).toLocaleDateString('ar-SA')}
-                        </span>
-                        {(isAdmin || coachId) && (
-                          <button
-                            onClick={() => deleteNote(note.id)}
-                            className="text-red-400 hover:text-red-600 text-xs transition"
-                          >
-                            🗑️
-                          </button>
-                        )}
+                {notes.map((note) => {
+                  const coachInitial = (note.coach?.name ?? 'م')?.[0]?.toUpperCase();
+                  return (
+                    <div key={note.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                      <div className="flex items-start gap-3">
+                        {/* Coach avatar */}
+                        <div className="w-9 h-9 rounded-full bg-green-700 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-green-600/30">
+                          {note.coach?.photoUrl ? (
+                            <img
+                              src={note.coach.photoUrl}
+                              alt={note.coach.name}
+                              className="w-9 h-9 object-cover rounded-full"
+                            />
+                          ) : (
+                            <span className="text-sm font-bold text-white">{coachInitial}</span>
+                          )}
+                        </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-1.5">
+                            <div className="text-sm font-semibold text-gray-900">
+                              {note.coach?.name ?? 'مدرب'}
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className="text-xs text-gray-400">
+                                {new Date(note.createdAt).toLocaleDateString('ar-SA')}
+                              </span>
+                              {(isAdmin || coachId) && (
+                                <button
+                                  onClick={() => deleteNote(note.id)}
+                                  className="text-red-400 hover:text-red-600 text-xs transition"
+                                >
+                                  🗑️
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-700 leading-relaxed">{note.content}</p>
+                        </div>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-700">{note.content}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

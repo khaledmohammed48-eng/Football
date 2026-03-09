@@ -12,7 +12,7 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
         attributes: true,
         notes: {
           orderBy: { createdAt: 'desc' },
-          include: { coach: { select: { name: true } } },
+          include: { coach: { select: { name: true, photoUrl: true } } },
         },
       },
     }),

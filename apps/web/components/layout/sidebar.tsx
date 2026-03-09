@@ -10,39 +10,75 @@ interface NavItem {
   icon: string;
 }
 
-const superAdminNav: NavItem[] = [
-  { href: '/super-admin', label: 'لوحة التحكم', icon: '🏠' },
-  { href: '/super-admin/academies', label: 'الأكاديميات', icon: '🏟️' },
-  { href: '/super-admin/users', label: 'مديرو الأكاديميات', icon: '👥' },
+interface NavGroup {
+  label: string | null;
+  items: NavItem[];
+}
+
+const superAdminNavGroups: NavGroup[] = [
+  {
+    label: null,
+    items: [
+      { href: '/super-admin', label: 'لوحة التحكم', icon: '🏠' },
+      { href: '/super-admin/academies', label: 'الأكاديميات', icon: '🏟️' },
+      { href: '/super-admin/users', label: 'مديرو الأكاديميات', icon: '👥' },
+    ],
+  },
 ];
 
-const adminNav: NavItem[] = [
-  { href: '/admin', label: 'لوحة التحكم', icon: '🏠' },
-  { href: '/admin/teams', label: 'الفرق', icon: '🏆' },
-  { href: '/admin/players', label: 'اللاعبون', icon: '⚽' },
-  { href: '/admin/coaches', label: 'المدربون', icon: '👨‍💼' },
-  { href: '/admin/accounts', label: 'الحسابات', icon: '👤' },
-  { href: '/admin/leagues', label: 'الدوريات', icon: '🏅' },
-  { href: '/admin/academy-profile', label: 'ملف الأكاديمية', icon: '🏟️' },
-  { href: '/admin/academies', label: 'أكاديميات أخرى', icon: '🤝' },
-  { href: '/admin/matches',     label: 'طلبات المباريات', icon: '⚔️' },
-  { href: '/admin/leaderboard', label: 'ترتيب الأكاديميات', icon: '📊' },
-  { href: '/admin/settings',    label: 'الإعدادات',       icon: '⚙️' },
+const adminNavGroups: NavGroup[] = [
+  {
+    label: 'الرئيسية',
+    items: [{ href: '/admin', label: 'لوحة التحكم', icon: '🏠' }],
+  },
+  {
+    label: 'إدارة الفريق',
+    items: [
+      { href: '/admin/teams',    label: 'الفرق',      icon: '🏆' },
+      { href: '/admin/players',  label: 'اللاعبون',   icon: '⚽' },
+      { href: '/admin/coaches',  label: 'المدربون',   icon: '👨‍💼' },
+      { href: '/admin/accounts', label: 'الحسابات',   icon: '👤' },
+    ],
+  },
+  {
+    label: 'المنافسات',
+    items: [
+      { href: '/admin/leagues',      label: 'الدوريات',           icon: '🏅' },
+      { href: '/admin/matches',      label: 'طلبات المباريات',     icon: '⚔️' },
+      { href: '/admin/academies',    label: 'أكاديميات أخرى',      icon: '🤝' },
+      { href: '/admin/leaderboard',  label: 'ترتيب الأكاديميات',  icon: '📊' },
+    ],
+  },
+  {
+    label: 'الأكاديمية',
+    items: [
+      { href: '/admin/academy-profile', label: 'ملف الأكاديمية', icon: '🏟️' },
+      { href: '/admin/settings',        label: 'الإعدادات',       icon: '⚙️' },
+    ],
+  },
 ];
 
-const coachNav: NavItem[] = [
-  { href: '/coach/team',        label: 'فريقي',              icon: '🏆' },
-  { href: '/coach/matches',     label: 'المباريات',           icon: '⚔️' },
-  { href: '/coach/leagues',     label: 'الدوريات',           icon: '🏅' },
-  { href: '/coach/leaderboard', label: 'ترتيب الأكاديميات',  icon: '📊' },
-  { href: '/coach/profile',     label: 'ملفي الشخصي',        icon: '👨‍💼' },
+const coachNavGroups: NavGroup[] = [
+  {
+    label: null,
+    items: [
+      { href: '/coach/team',        label: 'فريقي',               icon: '🏆' },
+      { href: '/coach/matches',     label: 'المباريات',            icon: '⚔️' },
+      { href: '/coach/leagues',     label: 'الدوريات',            icon: '🏅' },
+      { href: '/coach/leaderboard', label: 'ترتيب الأكاديميات',   icon: '📊' },
+    ],
+  },
 ];
 
-const playerNav: NavItem[] = [
-  { href: '/player/profile',     label: 'ملفي الشخصي',       icon: '⚽' },
-  { href: '/player/matches',     label: 'المباريات',          icon: '⚔️' },
-  { href: '/player/leagues',     label: 'الدوريات',          icon: '🏅' },
-  { href: '/player/leaderboard', label: 'ترتيب الأكاديميات', icon: '📊' },
+const playerNavGroups: NavGroup[] = [
+  {
+    label: null,
+    items: [
+      { href: '/player/matches',     label: 'المباريات',           icon: '⚔️' },
+      { href: '/player/leagues',     label: 'الدوريات',           icon: '🏅' },
+      { href: '/player/leaderboard', label: 'ترتيب الأكاديميات',  icon: '📊' },
+    ],
+  },
 ];
 
 interface SidebarProps {
@@ -56,13 +92,22 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-export function Sidebar({ role, userEmail, displayName, academyName, academyLogoUrl, photoUrl, isOpen = false, onClose }: SidebarProps) {
+export function Sidebar({
+  role,
+  userEmail,
+  displayName,
+  academyName,
+  academyLogoUrl,
+  photoUrl,
+  isOpen = false,
+  onClose,
+}: SidebarProps) {
   const pathname = usePathname();
 
-  const navItems =
-    role === 'SUPER_ADMIN' ? superAdminNav :
-    role === 'ADMIN'       ? adminNav       :
-    role === 'COACH'       ? coachNav       : playerNav;
+  const navGroups =
+    role === 'SUPER_ADMIN' ? superAdminNavGroups :
+    role === 'ADMIN'       ? adminNavGroups       :
+    role === 'COACH'       ? coachNavGroups       : playerNavGroups;
 
   const roleLabel =
     role === 'SUPER_ADMIN' ? 'مدير عام' :
@@ -70,9 +115,18 @@ export function Sidebar({ role, userEmail, displayName, academyName, academyLogo
     role === 'COACH'       ? 'مدرب'     : 'لاعب';
 
   const sidebarTitle =
-    role === 'SUPER_ADMIN'
-      ? 'أكاديمتنا'
-      : academyName ?? 'الأكاديمية';
+    role === 'SUPER_ADMIN' ? 'أكاديمتنا' : academyName ?? 'الأكاديمية';
+
+  // PLAYER → /player/profile, COACH → /coach/profile, others → no link
+  const profileHref =
+    role === 'PLAYER' ? '/player/profile' :
+    role === 'COACH'  ? '/coach/profile'  : null;
+
+  const avatarInitial = (displayName ?? userEmail)?.[0]?.toUpperCase() ?? '?';
+  const showName =
+    displayName && !displayName.includes('@academy.local') && !displayName.includes('@role.local')
+      ? displayName
+      : userEmail;
 
   return (
     <>
@@ -88,106 +142,140 @@ export function Sidebar({ role, userEmail, displayName, academyName, academyLogo
         className={`w-64 bg-gray-900 text-white flex flex-col min-h-screen fixed right-0 top-0 z-40 transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}`}
       >
-        {/* Logo + mobile close button */}
-        <div className="p-5 border-b border-gray-700">
+        {/* ── Close button: absolute, top-left of sidebar (mobile only) ── */}
+        <button
+          onClick={onClose}
+          className="lg:hidden absolute top-3 left-3 z-10 p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition"
+          aria-label="إغلاق القائمة"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+
+        {/* ── Header: Academy logo + name ── */}
+        <div className="px-5 pt-5 pb-4 border-b border-gray-700">
+          {/* Academy row */}
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-gray-800">
+            <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-gray-800">
               {academyLogoUrl ? (
-                <img src={academyLogoUrl} alt="شعار الأكاديمية" className="w-12 h-12 object-cover" />
+                <img src={academyLogoUrl} alt="شعار" className="w-10 h-10 object-cover" />
               ) : (
-                <Image
-                  src="/logo.svg"
-                  alt="شعار الأكاديمية"
-                  width={48}
-                  height={48}
-                  className="object-contain"
-                />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-bold text-sm leading-tight truncate">{sidebarTitle}</div>
-              <div className="text-xs text-gray-400 mt-0.5">{roleLabel}</div>
-            </div>
-            {/* Close button — mobile only */}
-            <button
-              onClick={onClose}
-              className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition flex-shrink-0"
-              aria-label="إغلاق القائمة"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <ul className="space-y-1">
-            {navItems.map((item) => {
-              const isActive =
-                item.href === '/admin' || item.href === '/super-admin'
-                  ? pathname === item.href
-                  : pathname.startsWith(item.href);
-
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition ${
-                      isActive
-                        ? 'bg-green-600 text-white'
-                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                    }`}
-                  >
-                    <span className="text-base">{item.icon}</span>
-                    <span>{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* User + Logout */}
-        <div className="p-4 border-t border-gray-700">
-          <div className="mb-3 flex items-center gap-3">
-            {/* Avatar */}
-            <div className="w-9 h-9 rounded-full bg-green-700 flex items-center justify-center overflow-hidden flex-shrink-0 border border-green-600">
-              {photoUrl ? (
-                <img src={photoUrl} alt="صورة الملف" className="w-9 h-9 object-cover rounded-full" />
-              ) : (
-                <span className="text-sm text-white">
-                  {(displayName ?? userEmail)?.[0]?.toUpperCase() ?? '?'}
-                </span>
+                <Image src="/logo.svg" alt="شعار" width={40} height={40} className="object-contain" />
               )}
             </div>
             <div className="min-w-0">
-              <div className="text-sm font-medium text-gray-200 truncate">
-                {displayName && !displayName.includes('@academy.local') ? displayName : userEmail}
-              </div>
-              <div className="text-xs text-gray-500 truncate mt-0.5">{roleLabel}</div>
+              <div className="font-bold text-sm leading-tight truncate">{sidebarTitle}</div>
+              <div className="text-xs text-gray-400 mt-0.5">الأكاديمية</div>
             </div>
           </div>
+
+          {/* ── User card (below academy) — clickable for PLAYER/COACH ── */}
+          <div className="mt-3">
+            {profileHref ? (
+              <Link
+                href={profileHref}
+                onClick={onClose}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-800/60 hover:bg-gray-800 transition group cursor-pointer"
+              >
+                {/* Avatar */}
+                <div className="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-green-600/40">
+                  {photoUrl ? (
+                    <img src={photoUrl} alt="الملف" className="w-10 h-10 object-cover rounded-full" />
+                  ) : (
+                    <span className="text-sm font-bold text-white">{avatarInitial}</span>
+                  )}
+                </div>
+                {/* Name + role */}
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-white truncate group-hover:text-green-400 transition">
+                    {showName}
+                  </div>
+                  <div className="text-xs text-green-500 mt-0.5 flex items-center gap-1">
+                    <span>{roleLabel}</span>
+                    <span>·</span>
+                    <span>الملف الشخصي</span>
+                  </div>
+                </div>
+                {/* Arrow hint */}
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-500 group-hover:text-green-400 transition flex-shrink-0 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-800/60">
+                <div className="w-10 h-10 rounded-full bg-green-700 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-green-600/40">
+                  {photoUrl ? (
+                    <img src={photoUrl} alt="الملف" className="w-10 h-10 object-cover rounded-full" />
+                  ) : (
+                    <span className="text-sm font-bold text-white">{avatarInitial}</span>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-white truncate">{showName}</div>
+                  <div className="text-xs text-gray-400 mt-0.5">{roleLabel}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Navigation ── */}
+        <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-5">
+          {navGroups.map((group, gi) => (
+            <div key={gi}>
+              {group.label && (
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 px-3">
+                  {group.label}
+                </div>
+              )}
+              <ul className="space-y-0.5">
+                {group.items.map((item) => {
+                  const isActive =
+                    item.href === '/admin' || item.href === '/super-admin'
+                      ? pathname === item.href
+                      : pathname.startsWith(item.href);
+
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={onClose}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
+                          isActive
+                            ? 'bg-green-600 text-white'
+                            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                        }`}
+                      >
+                        <span className="text-base leading-none">{item.icon}</span>
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </nav>
+
+        {/* ── Logout ── */}
+        <div className="p-4 border-t border-gray-700">
           <button
             onClick={async () => {
               try {
-                // Get CSRF token first
                 const csrfRes = await fetch('/api/auth/csrf');
                 const { csrfToken } = await csrfRes.json();
-                // POST to signout endpoint
                 await fetch('/api/auth/signout', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                   body: new URLSearchParams({ csrfToken }),
                 });
               } catch {
-                // ignore errors, proceed to redirect
+                // ignore
               }
               window.location.href = '/login';
             }}
-            className="w-full text-right text-sm text-red-400 hover:text-red-300 transition flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-gray-800 min-h-[44px]"
+            className="w-full text-sm text-red-400 hover:text-red-300 transition flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-800 min-h-[44px]"
           >
             <span>🚪</span>
             <span>تسجيل الخروج</span>

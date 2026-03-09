@@ -22,7 +22,7 @@ export default async function CoachPlayerPage({ params }: { params: { id: string
       attributes: true,
       notes: {
         orderBy: { createdAt: 'desc' },
-        include: { coach: { select: { name: true } } },
+        include: { coach: { select: { name: true, photoUrl: true } } },
       },
     },
   });

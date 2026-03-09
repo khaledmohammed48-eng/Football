@@ -12,7 +12,7 @@ export async function GET(
   const notes = await prisma.coachNote.findMany({
     where: { playerId: params.id },
     orderBy: { createdAt: 'desc' },
-    include: { coach: { select: { name: true } } },
+    include: { coach: { select: { name: true, photoUrl: true } } },
   });
 
   return successResponse(
@@ -65,7 +65,7 @@ export async function POST(
       playerId: params.id,
       coachId,
     },
-    include: { coach: { select: { name: true } } },
+    include: { coach: { select: { name: true, photoUrl: true } } },
   });
 
   return successResponse(
