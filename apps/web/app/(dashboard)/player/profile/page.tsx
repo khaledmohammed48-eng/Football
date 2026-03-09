@@ -5,6 +5,7 @@ import { ATTRIBUTE_KEYS, ATTRIBUTE_LABELS, ATTRIBUTE_COLORS, POSITION_LABELS } f
 import { SessionPlanViewer } from '@/components/coach/session-plan-viewer';
 import { BannersCarousel } from '@/components/academy/banners-carousel';
 import { PlayerProfileClient } from './player-profile-client';
+import { FifaCardModal } from '@/components/player/fifa-card';
 
 export default async function PlayerProfilePage() {
   const session = await getServerSession(authOptions);
@@ -20,6 +21,13 @@ export default async function PlayerProfilePage() {
       },
     },
   });
+
+  const academy = player?.academyId
+    ? await prisma.academy.findUnique({
+        where: { id: player.academyId },
+        select: { name: true, logoUrl: true },
+      })
+    : null;
 
   // Fetch upcoming session plans for player's team
   const upcomingSessions = player?.teamId
@@ -66,7 +74,21 @@ export default async function PlayerProfilePage() {
   return (
     <div>
       <BannersCarousel />
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">ملفي الشخصي</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">ملفي الشخصي</h1>
+        {player.attributes && (
+          <FifaCardModal
+            data={{
+              playerName: player.name,
+              photoUrl: player.photoUrl,
+              position: player.position,
+              attributes: player.attributes,
+              academyName: academy?.name ?? 'الأكاديمية',
+              academyLogoUrl: academy?.logoUrl,
+            }}
+          />
+        )}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profile Card — client component for photo upload */}

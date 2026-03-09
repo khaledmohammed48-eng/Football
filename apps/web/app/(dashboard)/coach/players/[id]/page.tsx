@@ -4,14 +4,20 @@ import { prisma } from '@/lib/prisma';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { PlayerProfileClient } from '@/app/(dashboard)/admin/players/[id]/player-profile-client';
+import { FifaCardModal } from '@/components/player/fifa-card';
 
 export default async function CoachPlayerPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
-  const coach = await prisma.coach.findUnique({
-    where: { userId: session!.user.id },
-    select: { id: true, coachTeams: { select: { teamId: true } } },
-  });
+  const [coach, academy] = await Promise.all([
+    prisma.coach.findUnique({
+      where: { userId: session!.user.id },
+      select: { id: true, coachTeams: { select: { teamId: true } } },
+    }),
+    session?.user?.academyId
+      ? prisma.academy.findUnique({ where: { id: session.user.academyId }, select: { name: true, logoUrl: true } })
+      : null,
+  ]);
 
   if (!coach) redirect('/coach/team');
 
@@ -51,12 +57,26 @@ export default async function CoachPlayerPage({ params }: { params: { id: string
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-8">
-        <Link href="/coach/team" className="text-gray-400 hover:text-gray-600 transition">
-          ← الفريق
-        </Link>
-        <span className="text-gray-300">/</span>
-        <h1 className="text-2xl font-bold text-gray-900">{player.name}</h1>
+      <div className="flex items-center justify-between gap-3 mb-8">
+        <div className="flex items-center gap-3">
+          <Link href="/coach/team" className="text-gray-400 hover:text-gray-600 transition">
+            ← الفريق
+          </Link>
+          <span className="text-gray-300">/</span>
+          <h1 className="text-2xl font-bold text-gray-900">{player.name}</h1>
+        </div>
+        {player.attributes && (
+          <FifaCardModal
+            data={{
+              playerName: player.name,
+              photoUrl: player.photoUrl,
+              position: player.position,
+              attributes: player.attributes,
+              academyName: academy?.name ?? 'الأكاديمية',
+              academyLogoUrl: academy?.logoUrl,
+            }}
+          />
+        )}
       </div>
       <PlayerProfileClient
         player={serialized}
