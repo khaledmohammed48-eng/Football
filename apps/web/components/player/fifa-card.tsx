@@ -277,13 +277,13 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
   const theme   = cardTheme(overall);
   const attrs   = data.attributes;
 
-  const stats: { label: string; value: number }[] = [
-    { label: 'PAC', value: attrs?.speed     ?? 0 },
-    { label: 'SHO', value: attrs?.shooting  ?? 0 },
-    { label: 'PAS', value: attrs?.passing   ?? 0 },
-    { label: 'DRI', value: attrs?.dribbling ?? 0 },
-    { label: 'DEF', value: attrs?.defense   ?? 0 },
-    { label: 'PHY', value: attrs?.stamina   ?? 0 },
+  const stats: { label: string; arabic: string; value: number }[] = [
+    { label: 'PAC', arabic: 'سرعة',    value: attrs?.speed     ?? 0 },
+    { label: 'SHO', arabic: 'تسديد',   value: attrs?.shooting  ?? 0 },
+    { label: 'PAS', arabic: 'تمرير',   value: attrs?.passing   ?? 0 },
+    { label: 'DRI', arabic: 'مراوغة',  value: attrs?.dribbling ?? 0 },
+    { label: 'DEF', arabic: 'دفاع',    value: attrs?.defense   ?? 0 },
+    { label: 'PHY', arabic: 'لياقة',   value: attrs?.stamina   ?? 0 },
   ];
 
   const cardW   = 370;
@@ -466,21 +466,31 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
           padding: '6px 0',
           direction: 'ltr',
         }}>
-          {stats.map(({ label, value }) => (
-            <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          {stats.map(({ label, arabic, value }) => (
+            <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+              {/* English abbrev */}
               <div style={{
-                fontSize: 9, fontWeight: 700, letterSpacing: 0.5,
+                fontSize: 8, fontWeight: 700, letterSpacing: 0.5,
                 color: theme.statLabel, opacity: 0.92,
                 fontFamily: "'Arial', sans-serif",
               }}>
                 {label}
               </div>
+              {/* Stat number */}
               <div style={{
-                fontSize: 19, fontWeight: 900, lineHeight: 1,
+                fontSize: 18, fontWeight: 900, lineHeight: 1,
                 color: theme.statValue,
                 fontFamily: "'Arial Black', sans-serif",
               }}>
                 {scaleStat(value)}
+              </div>
+              {/* Arabic name */}
+              <div style={{
+                fontSize: 7, fontWeight: 600,
+                color: theme.statLabel, opacity: 0.78,
+                whiteSpace: 'nowrap', letterSpacing: 0,
+              }}>
+                {arabic}
               </div>
             </div>
           ))}
@@ -544,7 +554,20 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
 
 export function FifaCard({ data }: { data: FifaCardData }) {
   const cardRef    = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
+  const wrapRef    = useRef<HTMLDivElement>(null);
+  const [scale, setScale]           = useState(1);
   const [downloading, setDownloading] = useState(false);
+
+  // Scale card to fit container width on small screens
+  useEffect(() => {
+    if (!wrapRef.current) return;
+    const obs = new ResizeObserver((entries) => {
+      const w = entries[0].contentRect.width;
+      setScale(w > 0 && w < 370 ? w / 370 : 1);
+    });
+    obs.observe(wrapRef.current);
+    return () => obs.disconnect();
+  }, []);
 
   const handleDownload = useCallback(async () => {
     if (!cardRef.current) return;
@@ -567,9 +590,22 @@ export function FifaCard({ data }: { data: FifaCardData }) {
     }
   }, [data.playerName]);
 
+  const cardH = 530;
+
   return (
-    <div className="flex flex-col items-center gap-4">
-      <FifaCardInner data={data} cardRef={cardRef} />
+    <div className="flex flex-col items-center gap-4 w-full">
+      {/* Scaling wrapper — shrinks card to fit on small screens */}
+      <div ref={wrapRef} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div style={{
+          transform: `scale(${scale})`,
+          transformOrigin: 'top center',
+          flexShrink: 0,
+          // compensate layout height after scale
+          marginBottom: `${Math.round(cardH * scale - cardH)}px`,
+        }}>
+          <FifaCardInner data={data} cardRef={cardRef} />
+        </div>
+      </div>
       <button
         onClick={handleDownload}
         disabled={downloading}
@@ -615,7 +651,7 @@ export function FifaCardModal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
             onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
           >
-            <div className="bg-gray-900 rounded-2xl p-6 flex flex-col items-center gap-4 shadow-2xl w-full max-w-sm overflow-y-auto max-h-[95vh]">
+            <div className="bg-gray-900 rounded-2xl p-3 sm:p-5 flex flex-col items-center gap-3 shadow-2xl w-full max-w-sm overflow-y-auto max-h-[95vh]">
 
               {/* Header — gold glow for best player */}
               <div className="flex items-center justify-between w-full">
