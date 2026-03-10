@@ -4,18 +4,14 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-interface LoginFormProps {
-  academyName: string;
-  academyLogoUrl?: string | null;
-}
+const PLATFORM_NAME = 'أكاديميتنا';
 
-export function LoginForm({ academyName, academyLogoUrl }: LoginFormProps) {
+export function LoginForm() {
   const router = useRouter();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword]     = useState('');
   const [error, setError]           = useState('');
   const [loading, setLoading]       = useState(false);
-  const [logoError, setLogoError]   = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,42 +27,15 @@ export function LoginForm({ academyName, academyLogoUrl }: LoginFormProps) {
     }
   }
 
-  // Show academy logo if available, else platform logo
-  function LogoImg({ size, rounded }: { size: number; rounded?: boolean }) {
-    if (academyLogoUrl && !logoError) {
-      return (
-        <img
-          src={academyLogoUrl}
-          alt={academyName}
-          width={size}
-          height={size}
-          className={`object-cover shadow-md flex-shrink-0 ${rounded ? 'rounded-2xl' : 'rounded-xl'}`}
-          onError={() => setLogoError(true)}
-          style={{ width: size, height: size }}
-        />
-      );
-    }
-    return (
-      <img
-        src="/logo.svg"
-        alt={academyName}
-        width={size}
-        height={size}
-        className="object-contain drop-shadow-lg flex-shrink-0"
-        style={{ width: size, height: size }}
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800" dir="rtl">
 
       {/* Left panel — desktop only */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-14 text-white">
         <div className="flex items-center gap-4">
-          <LogoImg size={64} />
+          <img src="/logo.svg" alt={PLATFORM_NAME} width={64} height={64} className="object-contain drop-shadow-lg flex-shrink-0" />
           <div>
-            <div className="text-2xl font-bold tracking-tight">{academyName}</div>
+            <div className="text-2xl font-bold tracking-tight">{PLATFORM_NAME}</div>
             <div className="text-green-300 text-sm mt-0.5">إدارة ذكية لأكاديميات كرة القدم</div>
           </div>
         </div>
@@ -109,8 +78,8 @@ export function LoginForm({ academyName, academyLogoUrl }: LoginFormProps) {
 
           {/* Mobile logo */}
           <div className="flex flex-col items-center mb-8 lg:hidden">
-            <LogoImg size={80} rounded />
-            <h1 className="text-xl font-bold text-gray-900 mt-3">{academyName}</h1>
+            <img src="/logo.svg" alt={PLATFORM_NAME} width={80} height={80} className="object-contain drop-shadow-lg" />
+            <h1 className="text-xl font-bold text-gray-900 mt-3">{PLATFORM_NAME}</h1>
             <p className="text-gray-400 text-sm mt-0.5">إدارة كرة القدم</p>
           </div>
 
