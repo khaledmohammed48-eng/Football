@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -23,6 +23,116 @@ export interface FifaCardData {
   isBestPlayer?: boolean;
 }
 
+// ── Confetti (5-minute celebration) ──────────────────────────────────────────
+
+const CONFETTI_COLORS = [
+  '#FFD700', '#FFFFFF', '#1a7a3a', '#FFA500',
+  '#FF4500', '#00CED1', '#FF69B4', '#c9a227',
+];
+
+interface ConfettiParticle {
+  x: number; y: number;
+  w: number; h: number;
+  color: string;
+  dx: number; dy: number;
+  rot: number; drot: number;
+  alpha: number;
+}
+
+// Canvas confetti that runs for `durationMs` milliseconds
+function ConfettiCanvas({ durationMs = 300_000 }: { durationMs?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles: ConfettiParticle[] = [];
+    const startTime = Date.now();
+    let lastSpawn   = startTime;
+    let animId: number;
+
+    function spawn(count: number) {
+      const W = canvas!.width;
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x:    Math.random() * W,
+          y:    -10 - Math.random() * 30,
+          w:    Math.random() * 9 + 4,
+          h:    Math.random() * 5 + 2,
+          color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+          dx:   (Math.random() - 0.5) * 4,
+          dy:   Math.random() * 3 + 1.5,
+          rot:  Math.random() * Math.PI * 2,
+          drot: (Math.random() - 0.5) * 0.18,
+          alpha: 1,
+        });
+      }
+    }
+
+    spawn(140); // initial burst
+
+    function animate() {
+      const now     = Date.now();
+      const elapsed = now - startTime;
+
+      // Spawn rate: heavy first 20s, light afterwards
+      const interval   = elapsed < 20_000 ? 600  : 4_000;
+      const spawnCount = elapsed < 20_000 ? 25   : 8;
+      if (now - lastSpawn > interval && elapsed < durationMs) {
+        spawn(spawnCount);
+        lastSpawn = now;
+      }
+
+      const W = canvas!.width;
+      const H = canvas!.height;
+      ctx.clearRect(0, 0, W, H);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x   += p.dx;
+        p.y   += p.dy;
+        p.dy  += 0.06;   // gravity
+        p.rot += p.drot;
+        if (p.y > H * 0.85) p.alpha -= 0.025;
+        if (p.y > H + 20 || p.alpha <= 0) { particles.splice(i, 1); continue; }
+
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+
+      if (elapsed < durationMs || particles.length > 0) {
+        animId = requestAnimationFrame(animate);
+      }
+    }
+
+    animId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animId);
+  }, [durationMs]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'fixed', inset: 0,
+        width: '100%', height: '100%',
+        pointerEvents: 'none',
+        zIndex: 9999,
+      }}
+    />
+  );
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function posShort(pos?: string | null) {
@@ -35,117 +145,116 @@ function posShort(pos?: string | null) {
   return map[pos ?? ''] ?? 'PLY';
 }
 
-// Overall out of 100.
-// Stored overall field: if >10 treat as already on 100-scale, else multiply ×10.
-// Fallback: average of 6 attributes × 10.
+// Overall: if stored > 10 treat as 100-scale, else × 10
 function computeOverall(attrs: FifaCardData['attributes']): number {
   if (!attrs) return 0;
   if (attrs.overall) {
     const raw = Number(attrs.overall);
-    const scaled = raw > 10 ? raw : raw * 10;
-    return Math.min(100, Math.round(scaled));
+    return Math.min(100, Math.round(raw > 10 ? raw : raw * 10));
   }
   const vals = [attrs.speed, attrs.passing, attrs.shooting, attrs.dribbling, attrs.defense, attrs.stamina];
   return Math.min(100, Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10));
 }
 
-// Individual stat: 1–10 → 10–100
+// 1–10 → 10–100
 function scaleStat(v: number): number {
   return Math.round(Math.min(100, Math.max(1, v * 10)));
 }
 
-// Tier theme
 function cardTheme(overall: number) {
   if (overall >= 90) {
     return {
-      // Pearl / Special
-      cardBg:         'linear-gradient(148deg, #ccc8b4 0%, #e8e4d4 40%, #f8f6ee 60%, #e0dcc8 85%, #ccc8b4 100%)',
-      photoBg:        '#c8c4b0',
-      photoOverlayL:  'rgba(205,200,185,0.82)',
-      photoOverlayT:  'rgba(180,175,155,0.55)',
-      fadeBottom:     '#dedad0',
-      border:         '#c9a227',
-      glow:           'rgba(201,162,39,0.70)',
-      innerBorder:    '#c9a22752',
-      textOverall:    '#6e500a',
-      textPos:        '#7a5c12',
-      textName:       '#111111',
-      statValue:      '#111111',
-      statLabel:      '#7a5c12',
-      divider:        '#c9a22760',
-      bottomBg:       'rgba(200,192,168,0.92)',
-      footerText:     '#6e500a',
-      silFill:        '#9a9070',
-      ornament:       '#c9a227',
-      label:          'SPECIAL',
+      cardBg:        'linear-gradient(148deg, #ccc8b4 0%, #e8e4d4 40%, #f8f6ee 60%, #e0dcc8 85%, #ccc8b4 100%)',
+      photoBg:       '#c8c4b0',
+      photoOverlayL: 'rgba(205,200,185,0.82)',
+      photoOverlayT: 'rgba(180,175,155,0.55)',
+      fadeBottom:    '#dedad0',
+      border:        '#c9a227',
+      glow:          'rgba(201,162,39,0.70)',
+      innerBorder:   '#c9a22752',
+      textOverall:   '#6e500a',
+      textPos:       '#7a5c12',
+      textName:      '#111111',
+      statValue:     '#111111',
+      statLabel:     '#7a5c12',
+      divider:       '#c9a22760',
+      bottomBg:      'rgba(200,192,168,0.92)',
+      footerText:    '#6e500a',
+      silFill:       '#9a9070',
+      ornament:      '#c9a227',
+      acText:        '#7a5c12',
+      label:         'SPECIAL',
     };
   }
   if (overall >= 80) {
     return {
-      cardBg:         'linear-gradient(148deg, #1a1000 0%, #432e00 38%, #7a5800 58%, #432e00 80%, #1a1000 100%)',
-      photoBg:        '#2a1e00',
-      photoOverlayL:  'rgba(20,14,0,0.75)',
-      photoOverlayT:  'rgba(10,8,0,0.60)',
-      fadeBottom:     '#261c00',
-      border:         '#f0c040',
-      glow:           'rgba(240,192,64,0.65)',
-      innerBorder:    '#f0c04050',
-      textOverall:    '#ffe880',
-      textPos:        '#ffd060',
-      textName:       '#ffffff',
-      statValue:      '#ffffff',
-      statLabel:      '#f0c040',
-      divider:        '#f0c04062',
-      bottomBg:       'rgba(6,4,0,0.78)',
-      footerText:     '#f0c040',
-      silFill:        '#b88030',
-      ornament:       '#f0c040',
-      label:          'GOLD',
+      cardBg:        'linear-gradient(148deg, #1a1000 0%, #432e00 38%, #7a5800 58%, #432e00 80%, #1a1000 100%)',
+      photoBg:       '#2a1e00',
+      photoOverlayL: 'rgba(20,14,0,0.75)',
+      photoOverlayT: 'rgba(10,8,0,0.60)',
+      fadeBottom:    '#261c00',
+      border:        '#f0c040',
+      glow:          'rgba(240,192,64,0.65)',
+      innerBorder:   '#f0c04050',
+      textOverall:   '#ffe880',
+      textPos:       '#ffd060',
+      textName:      '#ffffff',
+      statValue:     '#ffffff',
+      statLabel:     '#f0c040',
+      divider:       '#f0c04062',
+      bottomBg:      'rgba(6,4,0,0.78)',
+      footerText:    '#f0c040',
+      silFill:       '#b88030',
+      ornament:      '#f0c040',
+      acText:        '#f0c040',
+      label:         'GOLD',
     };
   }
   if (overall >= 70) {
     return {
-      cardBg:         'linear-gradient(148deg, #141414 0%, #303030 38%, #545454 58%, #303030 80%, #141414 100%)',
-      photoBg:        '#1a1a1a',
-      photoOverlayL:  'rgba(16,16,16,0.75)',
-      photoOverlayT:  'rgba(10,10,10,0.60)',
-      fadeBottom:     '#181818',
-      border:         '#b8b8b8',
-      glow:           'rgba(184,184,184,0.50)',
-      innerBorder:    '#b8b8b850',
-      textOverall:    '#e8e8e8',
-      textPos:        '#d0d0d0',
-      textName:       '#ffffff',
-      statValue:      '#ffffff',
-      statLabel:      '#cccccc',
-      divider:        '#c0c0c062',
-      bottomBg:       'rgba(0,0,0,0.72)',
-      footerText:     '#cccccc',
-      silFill:        '#808080',
-      ornament:       '#b8b8b8',
-      label:          'SILVER',
+      cardBg:        'linear-gradient(148deg, #141414 0%, #303030 38%, #545454 58%, #303030 80%, #141414 100%)',
+      photoBg:       '#1a1a1a',
+      photoOverlayL: 'rgba(16,16,16,0.75)',
+      photoOverlayT: 'rgba(10,10,10,0.60)',
+      fadeBottom:    '#181818',
+      border:        '#b8b8b8',
+      glow:          'rgba(184,184,184,0.50)',
+      innerBorder:   '#b8b8b850',
+      textOverall:   '#e8e8e8',
+      textPos:       '#d0d0d0',
+      textName:      '#ffffff',
+      statValue:     '#ffffff',
+      statLabel:     '#cccccc',
+      divider:       '#c0c0c062',
+      bottomBg:      'rgba(0,0,0,0.72)',
+      footerText:    '#cccccc',
+      silFill:       '#808080',
+      ornament:      '#b8b8b8',
+      acText:        '#cccccc',
+      label:         'SILVER',
     };
   }
   return {
-    cardBg:         'linear-gradient(148deg, #120600 0%, #2e1800 38%, #5a3000 58%, #2e1800 80%, #120600 100%)',
-    photoBg:        '#1a0a00',
-    photoOverlayL:  'rgba(16,8,0,0.75)',
-    photoOverlayT:  'rgba(10,5,0,0.60)',
-    fadeBottom:     '#160800',
-    border:         '#cd7832',
-    glow:           'rgba(205,120,50,0.50)',
-    innerBorder:    '#cd783250',
-    textOverall:    '#eeaa64',
-    textPos:        '#d09050',
-    textName:       '#fff0d8',
-    statValue:      '#fff0d8',
-    statLabel:      '#cd9050',
-    divider:        '#cd783262',
-    bottomBg:       'rgba(0,0,0,0.72)',
-    footerText:     '#d09050',
-    silFill:        '#804820',
-    ornament:       '#cd7832',
-    label:          'BRONZE',
+    cardBg:        'linear-gradient(148deg, #120600 0%, #2e1800 38%, #5a3000 58%, #2e1800 80%, #120600 100%)',
+    photoBg:       '#1a0a00',
+    photoOverlayL: 'rgba(16,8,0,0.75)',
+    photoOverlayT: 'rgba(10,5,0,0.60)',
+    fadeBottom:    '#160800',
+    border:        '#cd7832',
+    glow:          'rgba(205,120,50,0.50)',
+    innerBorder:   '#cd783250',
+    textOverall:   '#eeaa64',
+    textPos:       '#d09050',
+    textName:      '#fff0d8',
+    statValue:     '#fff0d8',
+    statLabel:     '#cd9050',
+    divider:       '#cd783262',
+    bottomBg:      'rgba(0,0,0,0.72)',
+    footerText:    '#d09050',
+    silFill:       '#804820',
+    ornament:      '#cd7832',
+    acText:        '#d09050',
+    label:         'BRONZE',
   };
 }
 
@@ -155,7 +264,7 @@ function todayStr() {
   return `${pad(d.getDate())} / ${pad(d.getMonth() + 1)} / ${d.getFullYear()}`;
 }
 
-// ── Card Inner ─────────────────────────────────────────────────────────────────
+// ── Card Inner ────────────────────────────────────────────────────────────────
 
 interface FifaCardInnerProps {
   data: FifaCardData;
@@ -167,7 +276,6 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
   const theme   = cardTheme(overall);
   const attrs   = data.attributes;
 
-  // Stats always in LTR order: PAC SHO PAS DRI DEF PHY
   const stats: { label: string; value: number }[] = [
     { label: 'PAC', value: attrs?.speed     ?? 0 },
     { label: 'SHO', value: attrs?.shooting  ?? 0 },
@@ -178,20 +286,23 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
   ];
 
   const cardW   = 370;
-  const cardH   = 520;
-  const photoH  = 330;           // top portion — photo fills full width
-  const bottomH = cardH - photoH; // bottom panel
+  const cardH   = 530;
+  const photoH  = 315;
+  const bottomH = cardH - photoH;   // 215px
+  const bpOff   = data.isBestPlayer ? 22 : 0;
 
-  const bestPlayerOffset = data.isBestPlayer ? 22 : 0;
+  // Truncate long academy names
+  const acName = data.academyName.length > 22
+    ? data.academyName.slice(0, 21) + '…'
+    : data.academyName;
 
   return (
-    // dir="ltr" — IMPORTANT: prevents RTL bleeding from parent page
+    // dir="ltr" prevents RTL bleeding — stats display in correct order
     <div
       ref={cardRef}
       dir="ltr"
       style={{
-        width: cardW,
-        height: cardH,
+        width: cardW, height: cardH,
         position: 'relative',
         borderRadius: 22,
         background: theme.cardBg,
@@ -203,13 +314,12 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
         flexShrink: 0,
       }}
     >
-      {/* ── BEST PLAYER BANNER (top strip) ── */}
+      {/* Best player banner */}
       {data.isBestPlayer && (
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
           background: 'linear-gradient(90deg, #8b6500, #ffd700, #ffc200, #ffd700, #8b6500)',
-          textAlign: 'center',
-          padding: '4px 0',
+          textAlign: 'center', padding: '4px 0',
           fontSize: 11, fontWeight: 900, letterSpacing: 2.5,
           color: '#1a0800',
           fontFamily: "'Arial Black', sans-serif",
@@ -219,14 +329,11 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
         </div>
       )}
 
-      {/* ── FULL-WIDTH PHOTO SECTION ── */}
+      {/* Full-width photo */}
       <div style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: photoH,
-        overflow: 'hidden',
-        background: theme.photoBg,
-        zIndex: 1,
+        position: 'absolute', top: 0, left: 0, right: 0,
+        height: photoH, overflow: 'hidden',
+        background: theme.photoBg, zIndex: 1,
       }}>
         {data.photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -234,23 +341,11 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
             src={data.photoUrl}
             alt={data.playerName}
             crossOrigin="anonymous"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center top',
-            }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
           />
         ) : (
-          /* Silhouette placeholder */
-          <div style={{
-            width: '100%', height: '100%',
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-          }}>
-            <svg
-              viewBox="0 0 200 260"
-              style={{ width: '55%', height: '92%', fill: theme.silFill, opacity: 0.45 }}
-            >
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+            <svg viewBox="0 0 200 260" style={{ width: '55%', height: '92%', fill: theme.silFill, opacity: 0.45 }}>
               <ellipse cx="100" cy="48" rx="40" ry="44" />
               <rect x="86" y="88" width="28" height="20" rx="6" />
               <path d="M26 260 Q40 162 100 142 Q160 162 174 260Z" />
@@ -259,43 +354,34 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
             </svg>
           </div>
         )}
-
-        {/* Left gradient — makes overall/position text readable over photo */}
+        {/* Gradients over photo */}
         <div style={{
-          position: 'absolute', top: 0, left: 0, bottom: 0,
-          width: '52%',
-          background: `linear-gradient(to right, ${theme.photoOverlayL} 0%, ${theme.photoOverlayL.replace('0.', '0.4').replace('0.75', '0.4').replace('0.82', '0.4')} 55%, transparent 100%)`,
+          position: 'absolute', top: 0, left: 0, bottom: 0, width: '52%',
+          background: `linear-gradient(to right, ${theme.photoOverlayL}, rgba(0,0,0,0) 100%)`,
           zIndex: 2,
         }} />
-
-        {/* Top gradient */}
         <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0,
-          height: 55,
+          position: 'absolute', top: 0, left: 0, right: 0, height: 55,
           background: `linear-gradient(to bottom, ${theme.photoOverlayT}, transparent)`,
           zIndex: 2,
         }} />
-
-        {/* Bottom fade into card body */}
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          height: 90,
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 90,
           background: `linear-gradient(to bottom, transparent, ${theme.fadeBottom})`,
           zIndex: 2,
         }} />
       </div>
 
-      {/* Inner decorative border frame */}
+      {/* Inner border */}
       <div style={{
         position: 'absolute', inset: 7, borderRadius: 16,
         border: `1.5px solid ${theme.innerBorder}`,
         pointerEvents: 'none', zIndex: 15,
       }} />
 
-      {/* Top ornament ✦ */}
+      {/* Top ornament */}
       <div style={{
-        position: 'absolute',
-        top: bestPlayerOffset + 6, left: '50%',
+        position: 'absolute', top: bpOff + 6, left: '50%',
         transform: 'translateX(-50%)',
         fontSize: 18, color: theme.ornament, zIndex: 12, lineHeight: 1,
         filter: `drop-shadow(0 0 6px ${theme.border})`,
@@ -303,14 +389,11 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
         ✦
       </div>
 
-      {/* ── OVERALL + POSITION + BADGE (top-left, over photo) ── */}
+      {/* Overall + Position — top left. NO academy logo here. */}
       <div style={{
-        position: 'absolute',
-        top: bestPlayerOffset + 18, left: 20,
-        zIndex: 10,
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        position: 'absolute', top: bpOff + 18, left: 20,
+        zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center',
       }}>
-        {/* Overall number */}
         <div style={{
           fontSize: 82, fontWeight: 900, lineHeight: 0.86,
           color: theme.textOverall,
@@ -320,8 +403,6 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
         }}>
           {overall}
         </div>
-
-        {/* Position */}
         <div style={{
           fontSize: 16, fontWeight: 900, letterSpacing: 3,
           color: theme.textPos, marginTop: 6,
@@ -330,35 +411,11 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
         }}>
           {posShort(data.position)}
         </div>
-
-        {/* Academy logo or ⚽ */}
-        <div style={{
-          marginTop: 10, width: 38, height: 38,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          {data.academyLogoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={data.academyLogoUrl}
-              alt=""
-              crossOrigin="anonymous"
-              style={{
-                width: 38, height: 38, objectFit: 'cover',
-                borderRadius: 8,
-                border: `2px solid ${theme.border}bb`,
-                boxShadow: `0 0 8px ${theme.glow}`,
-              }}
-            />
-          ) : (
-            <span style={{ fontSize: 26, filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.7))' }}>⚽</span>
-          )}
-        </div>
       </div>
 
-      {/* Tier badge — top-right */}
+      {/* Tier badge — top right */}
       <div style={{
-        position: 'absolute',
-        top: bestPlayerOffset + 18, right: 18,
+        position: 'absolute', top: bpOff + 18, right: 18,
         zIndex: 10,
         fontSize: 8, fontWeight: 900, letterSpacing: 1.5,
         color: theme.border,
@@ -370,41 +427,32 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
         {theme.label}
       </div>
 
-      {/* ── BOTTOM PANEL ── */}
+      {/* ── Bottom panel ── */}
       <div style={{
-        position: 'absolute',
-        bottom: 0, left: 0, right: 0,
+        position: 'absolute', bottom: 0, left: 0, right: 0,
         height: bottomH,
         background: theme.bottomBg,
         zIndex: 8,
-        display: 'flex',
-        flexDirection: 'column',
+        display: 'flex', flexDirection: 'column',
         justifyContent: 'space-evenly',
-        padding: '10px 18px',
+        padding: '8px 18px',
       }}>
 
-        {/* Player name — ALL CAPS, English */}
+        {/* Player name */}
         <div style={{
-          textAlign: 'center',
-          fontSize: 20,
-          fontWeight: 900,
-          letterSpacing: 3.5,
-          textTransform: 'uppercase',
+          textAlign: 'center', fontSize: 19, fontWeight: 900,
+          letterSpacing: 3.5, textTransform: 'uppercase',
           color: theme.textName,
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           textShadow: '0 1px 6px rgba(0,0,0,0.55)',
           fontFamily: "'Arial Black', sans-serif",
         }}>
           {data.playerName}
         </div>
 
-        {/* Stats: PAC SHO PAS DRI DEF PHY — label above, value below */}
+        {/* Stats: PAC SHO PAS DRI DEF PHY (label above, value below) */}
         <div style={{
-          display: 'flex',
-          justifyContent: 'space-around',
-          alignItems: 'center',
+          display: 'flex', justifyContent: 'space-around', alignItems: 'center',
           borderTop: `1px solid ${theme.divider}`,
           borderBottom: `1px solid ${theme.divider}`,
           padding: '6px 0',
@@ -419,7 +467,7 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
                 {label}
               </div>
               <div style={{
-                fontSize: 20, fontWeight: 900, lineHeight: 1,
+                fontSize: 19, fontWeight: 900, lineHeight: 1,
                 color: theme.statValue,
                 fontFamily: "'Arial Black', sans-serif",
               }}>
@@ -429,23 +477,36 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
           ))}
         </div>
 
-        {/* Footer: platform + date */}
+        {/* Academy row: Saudi flag + academy name */}
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         }}>
+          <span style={{ fontSize: 18, lineHeight: 1 }}>🇸🇦</span>
+          <span style={{
+            fontSize: 12, fontWeight: 700,
+            color: theme.acText, opacity: 0.90,
+            fontFamily: "'Arial', sans-serif",
+            letterSpacing: 0.5,
+          }}>
+            {acName}
+          </span>
+        </div>
+
+        {/* Footer: platform logo + "بواسطة أكاديميتنا ❤️" + date */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="" width={15} height={15} style={{ opacity: 0.80 }} />
+            <img src="/logo.svg" alt="" width={14} height={14} style={{ opacity: 0.78 }} />
             <span style={{
-              fontSize: 11, fontWeight: 700,
-              color: theme.footerText, opacity: 0.92,
+              fontSize: 10, fontWeight: 700,
+              color: theme.footerText, opacity: 0.88,
               fontFamily: "'Arial', sans-serif",
             }}>
               بواسطة أكاديميتنا ❤️
             </span>
           </div>
           <div style={{
-            fontSize: 9, color: theme.footerText, opacity: 0.65,
+            fontSize: 9, color: theme.footerText, opacity: 0.60,
             fontFamily: "'Arial', sans-serif",
           }}>
             {todayStr()}
@@ -456,10 +517,10 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
   );
 }
 
-// ── Main export: card + download button ───────────────────────────────────────
+// ── FifaCard (card + download) ────────────────────────────────────────────────
 
 export function FifaCard({ data }: { data: FifaCardData }) {
-  const cardRef = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
+  const cardRef    = useRef<HTMLDivElement>(null as unknown as HTMLDivElement);
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = useCallback(async () => {
@@ -468,16 +529,12 @@ export function FifaCard({ data }: { data: FifaCardData }) {
     try {
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(cardRef.current, {
-        useCORS: true,
-        scale: 3,
-        backgroundColor: null,
-        logging: false,
+        useCORS: true, scale: 3, backgroundColor: null, logging: false,
       });
       const url = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url;
-      const safeName = data.playerName.replace(/\s+/g, '_').toUpperCase();
-      a.download = `${safeName}_CARD.png`;
+      const a   = document.createElement('a');
+      a.href    = url;
+      a.download = `${data.playerName.replace(/\s+/g, '_').toUpperCase()}_CARD.png`;
       a.click();
     } catch (err) {
       console.error('Card export failed:', err);
@@ -505,7 +562,7 @@ export function FifaCard({ data }: { data: FifaCardData }) {
   );
 }
 
-// ── Modal wrapper ─────────────────────────────────────────────────────────────
+// ── Modal ─────────────────────────────────────────────────────────────────────
 
 export function FifaCardModal({
   data,
@@ -527,23 +584,33 @@ export function FifaCardModal({
       </div>
 
       {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
-        >
-          <div className="bg-gray-900 rounded-2xl p-6 flex flex-col items-center gap-4 shadow-2xl w-full max-w-sm overflow-y-auto max-h-[95vh]">
-            <div className="flex items-center justify-between w-full">
-              <h2 className="text-white font-bold text-lg">بطاقة اللاعب</h2>
-              <button
-                onClick={() => setOpen(false)}
-                className="text-gray-400 hover:text-white transition text-2xl leading-none"
-              >
-                ×
-              </button>
+        <>
+          {/* Confetti — only for best player, runs 5 minutes */}
+          {data.isBestPlayer && <ConfettiCanvas durationMs={300_000} />}
+
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
+          >
+            <div className="bg-gray-900 rounded-2xl p-6 flex flex-col items-center gap-4 shadow-2xl w-full max-w-sm overflow-y-auto max-h-[95vh]">
+
+              {/* Header — gold glow for best player */}
+              <div className="flex items-center justify-between w-full">
+                <h2 className={`font-bold text-lg ${data.isBestPlayer ? 'text-yellow-400' : 'text-white'}`}>
+                  {data.isBestPlayer ? '⭐ أفضل لاعب!' : 'بطاقة اللاعب'}
+                </h2>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="text-gray-400 hover:text-white transition text-2xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+
+              <FifaCard data={data} />
             </div>
-            <FifaCard data={data} />
           </div>
-        </div>
+        </>
       )}
     </>
   );
