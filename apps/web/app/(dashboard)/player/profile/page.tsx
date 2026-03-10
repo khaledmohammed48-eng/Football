@@ -84,6 +84,7 @@ export default async function PlayerProfilePage() {
             attributes: player.attributes,
             academyName: academy?.name ?? 'الأكاديمية',
             academyLogoUrl: academy?.logoUrl,
+            isBestPlayer: player.isBestPlayer,
           }}
         />
       </div>

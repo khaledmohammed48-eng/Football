@@ -105,6 +105,7 @@ model Player {
   teamId          String?
   academyId       String?
   isActive        Boolean   @default(true)
+  isBestPlayer    Boolean   @default(false) // coach-selected best player for the team
   subscriptionEnd DateTime? // null = no expiry set
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

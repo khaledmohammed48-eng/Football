@@ -5,6 +5,7 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { PlayerProfileClient } from '@/app/(dashboard)/admin/players/[id]/player-profile-client';
 import { FifaCardModal } from '@/components/player/fifa-card';
+import { BestPlayerButton } from '@/components/coach/best-player-button';
 
 export default async function CoachPlayerPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -65,16 +66,26 @@ export default async function CoachPlayerPage({ params }: { params: { id: string
           <span className="text-gray-300">/</span>
           <h1 className="text-2xl font-bold text-gray-900">{player.name}</h1>
         </div>
-        <FifaCardModal
-          data={{
-            playerName: player.name,
-            photoUrl: player.photoUrl,
-            position: player.position,
-            attributes: player.attributes,
-            academyName: academy?.name ?? 'الأكاديمية',
-            academyLogoUrl: academy?.logoUrl,
-          }}
-        />
+        <div className="flex items-center gap-2">
+          {player.teamId && (
+            <BestPlayerButton
+              playerId={player.id}
+              teamId={player.teamId}
+              isBestPlayer={player.isBestPlayer}
+            />
+          )}
+          <FifaCardModal
+            data={{
+              playerName: player.name,
+              photoUrl: player.photoUrl,
+              position: player.position,
+              attributes: player.attributes,
+              academyName: academy?.name ?? 'الأكاديمية',
+              academyLogoUrl: academy?.logoUrl,
+              isBestPlayer: player.isBestPlayer,
+            }}
+          />
+        </div>
       </div>
       <PlayerProfileClient
         player={serialized}

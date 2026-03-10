@@ -63,6 +63,7 @@ export default async function PlayerDetailPage({ params }: { params: { id: strin
             attributes: player.attributes,
             academyName: academy?.name ?? 'الأكاديمية',
             academyLogoUrl: academy?.logoUrl,
+            isBestPlayer: player.isBestPlayer,
           }}
         />
       </div>
