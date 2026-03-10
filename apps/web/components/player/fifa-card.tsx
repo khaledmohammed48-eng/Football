@@ -325,7 +325,7 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
           fontFamily: "'Arial Black', sans-serif",
           boxShadow: '0 2px 10px rgba(255,215,0,0.6)',
         }}>
-          ⭐ أفضل لاعب ⭐
+          ⭐ Best Player of the Month ⭐
         </div>
       )}
 
