@@ -483,13 +483,15 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
 
         {/* Academy name row */}
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <span style={{
-            fontSize: 12, fontWeight: 700,
-            color: theme.acText, opacity: 0.90,
+            fontSize: 13, fontWeight: 700,
+            color: theme.acText, opacity: 0.92,
             fontFamily: "'Arial', sans-serif",
-            letterSpacing: 0.5,
+            direction: 'rtl',        // fix Arabic text direction in ltr container
+            whiteSpace: 'nowrap',    // prevent bad line-wrap
+            letterSpacing: 0,        // letterSpacing breaks Arabic connections
           }}>
             {acName}
           </span>
@@ -504,6 +506,9 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
               fontSize: 10, fontWeight: 700,
               color: theme.footerText, opacity: 0.88,
               fontFamily: "'Arial', sans-serif",
+              direction: 'rtl',
+              whiteSpace: 'nowrap',
+              letterSpacing: 0,
             }}>
               بواسطة أكاديميتنا ❤️
             </span>
