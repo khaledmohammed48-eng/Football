@@ -48,6 +48,7 @@ function ConfettiCanvas({ durationMs = 300_000 }: { durationMs?: number }) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    const draw = ctx;
 
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -91,7 +92,7 @@ function ConfettiCanvas({ durationMs = 300_000 }: { durationMs?: number }) {
 
       const W = canvas!.width;
       const H = canvas!.height;
-      ctx.clearRect(0, 0, W, H);
+      draw.clearRect(0, 0, W, H);
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -102,13 +103,13 @@ function ConfettiCanvas({ durationMs = 300_000 }: { durationMs?: number }) {
         if (p.y > H * 0.85) p.alpha -= 0.025;
         if (p.y > H + 20 || p.alpha <= 0) { particles.splice(i, 1); continue; }
 
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-        ctx.restore();
+        draw.save();
+        draw.globalAlpha = p.alpha;
+        draw.translate(p.x, p.y);
+        draw.rotate(p.rot);
+        draw.fillStyle = p.color;
+        draw.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        draw.restore();
       }
 
       if (elapsed < durationMs || particles.length > 0) {
@@ -297,10 +298,9 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
     : data.academyName;
 
   return (
-    // dir="ltr" prevents RTL bleeding — stats display in correct order
+    // No dir attribute — let html2canvas read Arabic correctly from page context
     <div
       ref={cardRef}
-      dir="ltr"
       style={{
         width: cardW, height: cardH,
         position: 'relative',
@@ -324,6 +324,7 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
           color: '#1a0800',
           fontFamily: "'Arial Black', sans-serif",
           boxShadow: '0 2px 10px rgba(255,215,0,0.6)',
+          direction: 'ltr',
         }}>
           ⭐ Best Player of the Month ⭐
         </div>
@@ -393,6 +394,7 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
       <div style={{
         position: 'absolute', top: bpOff + 18, left: 20,
         zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center',
+        direction: 'ltr',
       }}>
         <div style={{
           fontSize: 82, fontWeight: 900, lineHeight: 0.86,
@@ -427,6 +429,7 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
         borderRadius: 5, padding: '3px 7px',
         background: 'rgba(0,0,0,0.40)',
         fontFamily: "'Arial', sans-serif",
+        direction: 'ltr',
       }}>
         {theme.label}
       </div>
@@ -450,6 +453,7 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           textShadow: '0 1px 6px rgba(0,0,0,0.55)',
           fontFamily: "'Arial Black', sans-serif",
+          direction: 'ltr',
         }}>
           {data.playerName}
         </div>
@@ -460,6 +464,7 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
           borderTop: `1px solid ${theme.divider}`,
           borderBottom: `1px solid ${theme.divider}`,
           padding: '6px 0',
+          direction: 'ltr',
         }}>
           {stats.map(({ label, value }) => (
             <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
@@ -484,21 +489,31 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
         {/* Academy name row */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: 7, direction: 'ltr',
         }}>
+          {data.academyLogoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={data.academyLogoUrl}
+              alt=""
+              crossOrigin="anonymous"
+              style={{ width: 20, height: 20, objectFit: 'contain', borderRadius: 3, opacity: 0.9 }}
+            />
+          )}
           <span style={{
             fontSize: 13, fontWeight: 700,
             color: theme.acText, opacity: 0.92,
             fontFamily: "'Arial', sans-serif",
-            direction: 'rtl',        // fix Arabic text direction in ltr container
             whiteSpace: 'nowrap',    // prevent bad line-wrap
             letterSpacing: 0,        // letterSpacing breaks Arabic connections
+            unicodeBidi: 'embed',
           }}>
             {acName}
           </span>
         </div>
 
         {/* Footer: platform logo + "بواسطة أكاديميتنا ❤️" + date */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', direction: 'ltr' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.svg" alt="" width={14} height={14} style={{ opacity: 0.78 }} />
@@ -506,9 +521,9 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
               fontSize: 10, fontWeight: 700,
               color: theme.footerText, opacity: 0.88,
               fontFamily: "'Arial', sans-serif",
-              direction: 'rtl',
               whiteSpace: 'nowrap',
               letterSpacing: 0,
+              unicodeBidi: 'embed',
             }}>
               بواسطة أكاديميتنا ❤️
             </span>
