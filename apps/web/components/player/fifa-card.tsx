@@ -287,9 +287,9 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
   ];
 
   const cardW   = 370;
-  const cardH   = 530;
-  const photoH  = 315;
-  const bottomH = cardH - photoH;   // 215px
+  const cardH   = 570;
+  const photoH  = 310;
+  const bottomH = cardH - photoH;   // 260px — more room for 4 rows
   const bpOff   = data.isBestPlayer ? 22 : 0;
 
   // Truncate long academy names
@@ -421,14 +421,15 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
 
       {/* Tier badge — top right */}
       <div style={{
-        position: 'absolute', top: bpOff + 18, right: 18,
+        position: 'absolute', top: bpOff + 14, right: 14,
         zIndex: 10,
-        fontSize: 8, fontWeight: 900, letterSpacing: 1.5,
+        fontSize: 7, fontWeight: 700, letterSpacing: 1,
         color: theme.border,
-        border: `1px solid ${theme.border}90`,
-        borderRadius: 5, padding: '3px 7px',
-        background: 'rgba(0,0,0,0.40)',
+        border: `1px solid ${theme.border}60`,
+        borderRadius: 4, padding: '2px 5px',
+        background: 'rgba(0,0,0,0.50)',
         fontFamily: "'Arial', sans-serif",
+        opacity: 0.75,
         direction: 'ltr',
       }}>
         {theme.label}
@@ -447,12 +448,12 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
 
         {/* Player name */}
         <div style={{
-          textAlign: 'center', fontSize: 19, fontWeight: 900,
-          letterSpacing: 3.5, textTransform: 'uppercase',
+          textAlign: 'center', fontSize: 22, fontWeight: 700,
+          letterSpacing: 1.5, textTransform: 'uppercase',
           color: theme.textName,
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          textShadow: '0 1px 6px rgba(0,0,0,0.55)',
-          fontFamily: "'Arial Black', sans-serif",
+          textShadow: '0 1px 8px rgba(0,0,0,0.7)',
+          fontFamily: "'Arial', Arial, sans-serif",
           direction: 'ltr',
         }}>
           {data.playerName}
@@ -575,7 +576,9 @@ export function FifaCard({ data }: { data: FifaCardData }) {
     try {
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(cardRef.current, {
-        useCORS: true, scale: 3, backgroundColor: null, logging: false,
+        useCORS: true, scale: 3,
+        width: 370, height: 570,   // explicit dims — unaffected by parent zoom
+        backgroundColor: null, logging: false,
       });
       const url = canvas.toDataURL('image/png');
       const a   = document.createElement('a');
@@ -590,19 +593,11 @@ export function FifaCard({ data }: { data: FifaCardData }) {
     }
   }, [data.playerName]);
 
-  const cardH = 530;
-
   return (
     <div className="flex flex-col items-center gap-4 w-full">
-      {/* Scaling wrapper — shrinks card to fit on small screens */}
+      {/* zoom shrinks card in layout (unlike transform: scale) */}
       <div ref={wrapRef} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <div style={{
-          transform: `scale(${scale})`,
-          transformOrigin: 'top center',
-          flexShrink: 0,
-          // compensate layout height after scale
-          marginBottom: `${Math.round(cardH * scale - cardH)}px`,
-        }}>
+        <div style={{ zoom: scale }}>
           <FifaCardInner data={data} cardRef={cardRef} />
         </div>
       </div>
