@@ -389,7 +389,7 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
         ✦
       </div>
 
-      {/* Overall + Position — top left. NO academy logo here. */}
+      {/* Overall + Position + 🇸🇦 — top left */}
       <div style={{
         position: 'absolute', top: bpOff + 18, left: 20,
         zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -410,6 +410,10 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
           fontFamily: "'Arial Black', sans-serif",
         }}>
           {posShort(data.position)}
+        </div>
+        {/* Saudi flag below position */}
+        <div style={{ marginTop: 8, fontSize: 26, lineHeight: 1, filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.6))' }}>
+          🇸🇦
         </div>
       </div>
 
@@ -477,11 +481,10 @@ function FifaCardInner({ data, cardRef }: FifaCardInnerProps) {
           ))}
         </div>
 
-        {/* Academy row: Saudi flag + academy name */}
+        {/* Academy name row */}
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
         }}>
-          <span style={{ fontSize: 18, lineHeight: 1 }}>🇸🇦</span>
           <span style={{
             fontSize: 12, fontWeight: 700,
             color: theme.acText, opacity: 0.90,
